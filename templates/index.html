@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Remote Trackpad Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Socket.IO client from CDN -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --card: #18181c;
+      --accent: #4f8cff;
+      --accent-soft: rgba(79, 140, 255, 0.2);
+      --border: #2b2b33;
+      --text-main: #f5f5f7;
+      --text-muted: #8a8a96;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #18181f 0, #050509 60%);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .header {
+      padding: 10px 16px 6px;
+      text-align: center;
+      font-size: 18px;
+      background: linear-gradient(to bottom, #15151b, #101015);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    .app-title {
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .app-title span.logo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(79,140,255,0.9);
+    }
+
+    #status {
+      font-size: 11px;
+      margin-top: 2px;
+      color: var(--text-muted);
+    }
+
+    .tabs {
+      display: flex;
+      padding: 6px 10px 8px;
+      gap: 6px;
+      background: #101014;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 6px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text-main);
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 10px;
+    }
+
+    .card {
+      background: rgba(12, 12, 16, 0.96);
+      border-radius: 18px;
+      border: 1px solid rgba(70, 70, 90, 0.7);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .view {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    /* Touchpad */
+
+    #pad {
+      flex: 1;
+      border-radius: 16px;
+      border: 1px solid #333544;
+      background: radial-gradient(circle at top, #272738 0, #080811 75%);
+      touch-action: none;
+      position: relative;
+    }
+
+    .touchpad-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .btn-pill {
+      flex: 1;
+      padding: 11px;
+      border-radius: 999px;
+      border: none;
+      font-size: 14px;
+      background: #20202a;
+      color: #f1f1f5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    .btn-pill:active {
+      transform: scale(0.97);
+      background: #2b2b37;
+    }
+
+    .speed-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .speed-row span.label {
+      width: 42px;
+    }
+
+    .speed-row input[type="range"] {
+      flex: 1;
+    }
+
+    .speed-value {
+      width: 38px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-main);
+      font-size: 11px;
+    }
+
+    .hint {
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    #scrollArea {
+      width: 80px;
+      border-radius: 16px;
+      border: 1px dashed #3d3d4a;
+      background: #12121a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+
+    .bottom-row {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    /* Keyboard view */
+
+    .kb-text-wrapper {
+      flex: 1;
+    }
+
+    #kbText {
+      width: 100%;
+      height: 110px;
+      border-radius: 12px;
+      border: 1px solid #343446;
+      background: #14141c;
+      color: var(--text-main);
+      padding: 8px;
+      font-size: 14px;
+      resize: none;
+    }
+
+    #kbText::placeholder {
+      color: #5e5e6a;
+    }
+
+    .kb-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 14px rgba(79,140,255,0.7);
+    }
+
+    .btn-secondary {
+      padding: 10px;
+      border-radius: 999px;
+      border: 1px solid #333349;
+      background: #181822;
+      color: var(--text-main);
+      font-size: 13px;
+    }
+
+    .kb-keys {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .kb-key-btn {
+      flex: 1 0 calc(25% - 6px);
+      min-width: 60px;
+      padding: 8px;
+      border-radius: 999px;
+      border: none;
+      background: #20202b;
+      color: var(--text-main);
+      font-size: 12px;
+    }
+
+    /* Media view */
+
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .media-btn {
+      padding: 10px 6px;
+      border-radius: 14px;
+      border: none;
+      background: #20202b;
+      color: var(--text-main);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .media-btn.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .media-btn:active {
+      transform: scale(0.97);
+      filter: brightness(1.1);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title span.badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    @media (min-width: 700px) {
+      .content {
+        max-width: 480px;
+        margin: 0 auto;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="app-title">
+        <span class="logo-dot"></span>
+        Remote Trackpad Pro
+      </div>
+      <div id="status">Connecting...</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-view="touchpad">Touchpad</button>
+      <button class="tab-btn" data-view="keyboard">Keyboard</button>
+      <button class="tab-btn" data-view="media">Media</button>
+    </div>
+
+    <div class="content">
+      <!-- Touchpad View -->
+      <div id="view-touchpad" class="view active">
+        <div class="card" style="flex:1; min-height: 0;">
+          <div class="section-title">
+            <span>Trackpad</span>
+            <span class="badge">Gestures</span>
+          </div>
+          <div id="pad"></div>
+        </div>
+
+        <div class="card touchpad-footer">
+          <div class="buttons">
+            <button class="btn-pill" id="leftBtn">Left Click</button>
+            <button class="btn-pill" id="rightBtn">Right Click</button>
+          </div>
+
+          <div class="speed-row">
+            <span class="label">Speed</span>
+            <input id="speedSlider" type="range" min="0.3" max="3" step="0.1" value="1.5">
+            <span id="speedLabel" class="speed-value">1.5×</span>
+          </div>
+
+          <div class="bottom-row">
+            <div style="flex: 1" class="hint">
+              Drag to move cursor. Tap = click, double-tap = double click, long-press = right click.
+            </div>
+            <div id="scrollArea">
+              Scroll<br />
+              <span style="opacity:0.7; font-size:10px;">Swipe up/down</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keyboard View -->
+      <div id="view-keyboard" class="view">
+        <div class="card">
+          <div class="section-title">
+            <span>Keyboard</span>
+            <span class="badge">Text input</span>
+          </div>
+          <div class="kb-text-wrapper">
+            <textarea id="kbText" placeholder="Type here and tap “Type on PC” to send text to the computer..."></textarea>
+          </div>
+          <div class="kb-actions">
+            <button id="kbSend" class="btn-primary">Type on PC</button>
+            <button id="kbClear" class="btn-secondary">Clear</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <span>Special keys</span>
+            <span class="badge">Shortcuts</span>
+          </div>
+          <div class="kb-keys">
+            <button class="kb-key-btn" data-key="enter">Enter ↩</button>
+            <button class="kb-key-btn" data-key="backspace">Backspace ⌫</button>
+            <button class="kb-key-btn" data-key="tab">Tab ⇥</button>
+            <button class="kb-key-btn" data-key="esc">Esc</button>
+
+            <button class="kb-key-btn" data-key="up">↑</button>
+            <button class="kb-key-btn" data-key="down">↓</button>
+            <button class="kb-key-btn" data-key="left">←</button>
+            <button class="kb-key-btn" data-key="right">→</button>
+
+            <button class="kb-key-btn" data-key="delete">Delete</button>
+            <button class="kb-key-btn" data-key="home">Home</button>
+            <button class="kb-key-btn" data-key="end">End</button>
+            <button class="kb-key-btn" data-key="page_up">PageUp</button>
+            <button class="kb-key-btn" data-key="page_down">PageDown</button>
+
+            <button class="kb-key-btn" data-key="space">Space ␣</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Media View -->
+      <div id="view-media" class="view">
+        <div class="card">
+          <div class="section-title">
+            <span>Media controls</span>
+            <span class="badge">System</span>
+          </div>
+          <div class="media-grid">
+            <button class="media-btn" data-key="media_previous">⏮ Prev</button>
+            <button class="media-btn primary" data-key="media_play_pause">⏯ Play/Pause</button>
+            <button class="media-btn" data-key="media_next">⏭ Next</button>
+
+            <button class="media-btn" data-key="media_volume_down">🔉 Vol -</button>
+            <button class="media-btn" data-key="media_volume_mute">🔇 Mute</button>
+            <button class="media-btn" data-key="media_volume_up">🔊 Vol +</button>
+          </div>
+          <div class="hint" style="margin-top:6px;">
+            Media keys behavior can vary a bit depending on OS and active app.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    const statusEl = document.getElementById("status");
+
+    // ----- Connection status -----
+    socket.on("connect", () => {
+      statusEl.textContent = "Connected ✔";
+    });
+
+    socket.on("disconnect", () => {
+      statusEl.textContent = "Disconnected ✖";
+    });
+
+    // ----- Tabs -----
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const views = {
+      touchpad: document.getElementById("view-touchpad"),
+      keyboard: document.getElementById("view-keyboard"),
+      media: document.getElementById("view-media"),
+    };
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const viewName = btn.dataset.view;
+        // toggle active tab
+        tabButtons.forEach(b => b.classList.toggle("active", b === btn));
+        // toggle views
+        Object.entries(views).forEach(([name, el]) => {
+          el.classList.toggle("active", name === viewName);
+        });
+      });
+    });
+
+    // ----- Touchpad: pointer movement + gestures -----
+    const pad = document.getElementById("pad");
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
+    const scrollArea = document.getElementById("scrollArea");
+
+    const speedSlider = document.getElementById("speedSlider");
+    const speedLabel = document.getElementById("speedLabel");
+
+    let speedFactor = parseFloat(speedSlider.value);
+    speedSlider.addEventListener("input", () => {
+      speedFactor = parseFloat(speedSlider.value);
+      speedLabel.textContent = speedFactor.toFixed(1) + "×";
+    });
+
+    // movement state
+    let lastX = null;
+    let lastY = null;
+
+    function startPointer(x, y) {
+      lastX = x;
+      lastY = y;
+    }
+
+    function movePointer(x, y) {
+      if (lastX === null || lastY === null) {
+        lastX = x;
+        lastY = y;
+        return;
+      }
+      let dx = x - lastX;
+      let dy = y - lastY;
+      lastX = x;
+      lastY = y;
+
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+
+      dx *= speedFactor;
+      dy *= speedFactor;
+
+      socket.emit("move", { dx, dy });
+    }
+
+    function endPointer() {
+      lastX = null;
+      lastY = null;
+    }
+
+    // Gesture detection
+    let touchStartTime = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let lastTapTime = 0;
+    let longPressTimer = null;
+    let longPressTriggered = false;
+
+    const TAP_MAX_TIME = 260;
+    const DOUBLE_TAP_GAP = 350;
+    const TAP_MAX_MOVE = 22;
+    const LONG_PRESS_TIME = 550;
+
+    function distance(aX, aY, bX, bY) {
+      const dx = aX - bX;
+      const dy = aY - bY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function handleTapGesture(endX, endY) {
+      const now = Date.now();
+      const dt = now - touchStartTime;
+      const moved = distance(touchStartX, touchStartY, endX, endY);
+
+      if (dt > TAP_MAX_TIME || moved > TAP_MAX_MOVE) {
+        return;
+      }
+
+      if (now - lastTapTime < DOUBLE_TAP_GAP) {
+        // double-tap -> double left click
+        socket.emit("click", { button: "left" });
+        socket.emit("click", { button: "left" });
+        lastTapTime = 0;
+      } else {
+        // single tap
+        socket.emit("click", { button: "left" });
+        lastTapTime = now;
+      }
+    }
+
+    function scheduleLongPress() {
+      clearLongPress();
+      longPressTriggered = false;
+      longPressTimer = setTimeout(() => {
+        longPressTriggered = true;
+        socket.emit("click", { button: "right" });
+      }, LONG_PRESS_TIME);
+    }
+
+    function clearLongPress() {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    }
+
+    // touch events on pad
+    pad.addEventListener("touchstart", (e) => {
+      if (e.touches.length !== 1) return; // keep simple: 1-finger for move
+      const t = e.touches[0];
+      const x = t.clientX;
+      const y = t.clientY;
+
+      touchStartTime = Date.now();
+      touchStartX = x;
+      touchStartY = y;
+      longPressTriggered = false;
+      scheduleLongPress();
+
+      startPointer(x, y);
+    }, { passive: true });
+
+    pad.addEventListener("touchmove", (e) => {
+      if (e.touches.length !== 1) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      const x = t.clientX;
+      const y = t.clientY;
+
+      if (distance(touchStartX, touchStartY, x, y) > TAP_MAX_MOVE) {
+        clearLongPress();
+      }
+
+      movePointer(x, y);
+    }, { passive: false });
+
+    pad.addEventListener("touchend", () => {
+      clearLongPress();
+      endPointer();
+
+      if (!longPressTriggered) {
+        handleTapGesture(touchStartX, touchStartY);
+      }
+    });
+
+    // mouse support (for testing from laptop browser)
+    let isMouseDown = false;
+
+    pad.addEventListener("mousedown", (e) => {
+      isMouseDown = true;
+      startPointer(e.clientX, e.clientY);
+    });
+
+    pad.addEventListener("mousemove", (e) => {
+      if (!isMouseDown) return;
+      movePointer(e.clientX, e.clientY);
+    });
+
+    pad.addEventListener("mouseup", () => {
+      isMouseDown = false;
+      endPointer();
+    });
+
+    pad.addEventListener("mouseleave", () => {
+      isMouseDown = false;
+      endPointer();
+    });
+
+    // click buttons
+    leftBtn.addEventListener("click", () => {
+      socket.emit("click", { button: "left" });
+    });
+
+    rightBtn.addEventListener("click", () => {
+      socket.emit("click", { button: "right" });
+    });
+
+    // scroll area (vertical scroll)
+    let lastScrollY = null;
+
+    scrollArea.addEventListener("touchstart", (e) => {
+      const t = e.touches[0];
+      lastScrollY = t.clientY;
+    }, { passive: true });
+
+    scrollArea.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      const t = e.touches[0];
+      if (lastScrollY === null) {
+        lastScrollY = t.clientY;
+        return;
+      }
+      const dy = t.clientY - lastScrollY;
+      lastScrollY = t.clientY;
+
+      if (Math.abs(dy) < 1) return;
+      socket.emit("scroll", { dx: 0, dy: -dy / 5 });
+    }, { passive: false });
+
+    scrollArea.addEventListener("touchend", () => {
+      lastScrollY = null;
+    });
+
+    // ----- Keyboard: text + special keys -----
+    const kbText = document.getElementById("kbText");
+    const kbSend = document.getElementById("kbSend");
+    const kbClear = document.getElementById("kbClear");
+    const kbKeyButtons = document.querySelectorAll(".kb-key-btn");
+
+    kbSend.addEventListener("click", () => {
+      const text = kbText.value;
+      if (text && socket.connected) {
+        socket.emit("text", { text });
+      }
+    });
+
+    kbClear.addEventListener("click", () => {
+      kbText.value = "";
+    });
+
+    kbKeyButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const keyName = btn.dataset.key;
+        if (!keyName) return;
+        socket.emit("key", { name: keyName, action: "tap" });
+      });
+    });
+
+    // ----- Media controls -----
+    const mediaButtons = document.querySelectorAll(".media-btn");
+    mediaButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const keyName = btn.dataset.key;
+        if (!keyName) return;
+        socket.emit("key", { name: keyName, action: "tap" });
+      });
+    });
+  </script>
+</body>
+</html>
