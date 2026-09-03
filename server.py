@@ -197,6 +197,18 @@ def resolve_gamepad_input(code):
         "left": Key.left,
         "right": Key.right,
         "backspace": Key.backspace,
+        "caps_lock": Key.caps_lock,
+        "delete": Key.delete,
+        "page_up": Key.page_up,
+        "page_down": Key.page_down,
+        "home": Key.home,
+        "end": Key.end,
+        "f1": Key.f1,
+        "f2": Key.f2,
+        "f3": Key.f3,
+        "f4": Key.f4,
+        "f5": Key.f5,
+        "f6": Key.f6,
     }
     if code_lower in special_keys:
         return "key", special_keys[code_lower]

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Remote Trackpad Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
   <!-- Socket.IO client hosted locally for fast LAN / offline loading -->
   <script src="/static/socket.io.min.js"></script>
@@ -20,6 +20,16 @@
       --text-main: #f5f5f7;
       --text-muted: #8b8d9c;
       --trackpad-surface: linear-gradient(170deg, #1f202b 0%, #13141b 55%, #0d0e13 100%);
+      
+      /* Screenshot Gamepad Design Tokens */
+      --gp-bg: #18181a;
+      --gp-btn-base: #525256;
+      --gp-btn-border: #2c2c2e;
+      --gp-btn-text: #18181a;
+      --gp-btn-active: #787880;
+      --gp-stick-outer: #242426;
+      --gp-stick-ring: #333336;
+      --gp-stick-knob: #545458;
     }
 
     * {
@@ -236,7 +246,6 @@
       cursor: default;
     }
 
-    /* Satin glass texture sheen */
     .mac-trackpad-frame::before {
       content: "";
       position: absolute;
@@ -245,7 +254,6 @@
       pointer-events: none;
     }
 
-    /* Upper Active Motion Zone */
     .trackpad-motion-zone {
       flex: 1;
       position: relative;
@@ -274,7 +282,6 @@
       background: rgba(255, 255, 255, 0.15);
     }
 
-    /* Drag Lock Pill */
     .drag-pill {
       position: absolute;
       top: 12px;
@@ -296,7 +303,6 @@
       transform: translateY(0);
     }
 
-    /* Integrated Bottom Click Bar */
     .trackpad-click-strip {
       height: 72px;
       min-height: 72px;
@@ -310,7 +316,6 @@
       box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.55);
     }
 
-    /* Laser-etched Center Divider */
     .click-divider {
       position: absolute;
       top: 14%;
@@ -323,7 +328,6 @@
       z-index: 2;
     }
 
-    /* Integrated Click Buttons with High Contrast & Visual Depth */
     .click-zone {
       flex: 1;
       height: 54px;
@@ -352,7 +356,6 @@
       transition: all 0.1s ease;
     }
 
-    /* Tactile Press (Force Touch style) */
     .click-zone.active-press {
       background: rgba(79, 140, 255, 0.25);
       border-color: rgba(79, 140, 255, 0.75);
@@ -366,7 +369,6 @@
       transform: scale(0.92);
     }
 
-    /* Gesture Guide Bar */
     .trackpad-guide-bar {
       display: flex;
       align-items: center;
@@ -393,388 +395,552 @@
       opacity: 0.35;
     }
 
-    /* ==================== Gamepad View ==================== */
-    
+    /* ================================================================ */
+    /* ==================== SCREENSHOT GAMEPAD UI ===================== */
+    /* ================================================================ */
+
     #view-gamepad {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--gp-bg);
+      display: none;
+      position: relative;
+      touch-action: none;
       user-select: none;
       -webkit-user-select: none;
-      touch-action: none;
-      gap: 6px;
+      overflow: hidden;
     }
 
-    .gamepad-hud {
+    #view-gamepad.active {
       display: flex;
+      flex-direction: column;
+    }
+
+    /* Fullscreen Gamepad Container (Fits 100% of mobile screen) */
+    .gamepad-fullscreen-canvas {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      padding: calc(6px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
+      box-sizing: border-box;
+      background: var(--gp-bg);
+    }
+
+    /* When browser is in Fullscreen, expand completely */
+    :fullscreen #view-gamepad,
+    :-webkit-full-screen #view-gamepad {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      width: 100vw;
+      height: 100dvh;
+    }
+
+    /* Top Navigation (3 Dots: Layout 1, Layout 2, Connection Status) */
+    .gp-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      padding-top: 2px;
+      height: 32px;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .gp-dot-toggle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #8e8e93;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.15s ease;
+    }
+
+    .gp-dot-toggle.active {
+      border-color: #d1d1d6;
+    }
+
+    .gp-dot-toggle.active::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #d1d1d6;
+    }
+
+    .gp-wifi-beacon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #636366;
+      cursor: pointer;
+    }
+
+    .gp-wifi-beacon.connected {
+      color: #34d399;
+    }
+
+    /* Layout Switcher Container */
+    .gp-layout-viewport {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      min-height: 0;
+    }
+
+    .gp-layout-stage {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      display: none;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 12px;
-      background: rgba(22, 23, 31, 0.85);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      gap: 8px;
-      flex-shrink: 0;
     }
 
-    .preset-selector {
+    .gp-layout-stage.active {
+      display: flex;
+    }
+
+    /* Layout Wings (Left, Center, Right) */
+    .gp-wing-left, .gp-wing-right {
+      position: relative;
+      height: 100%;
+      flex: 1;
+      max-width: 44%;
+    }
+
+    .gp-wing-center {
+      position: relative;
+      height: 100%;
+      width: 18%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    /* Center Navigation Buttons & Pill */
+    .gp-center-nav-buttons {
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 3px 8px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      font-size: 11px;
-      font-weight: 500;
+      justify-content: center;
+      gap: 12px;
     }
 
-    .preset-selector select {
-      background: transparent;
-      border: none;
-      color: var(--text-main);
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .preset-selector select option {
-      background: #191a24;
-      color: #fff;
-    }
-
-    .fullscreen-btn {
+    .gp-nav-circle-btn {
+      width: clamp(34px, 6.5vmin, 44px);
+      height: clamp(34px, 6.5vmin, 44px);
+      border-radius: 50%;
+      background: #48484a;
+      border: 2px solid #2c2c2e;
+      color: #1a1a1c;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      transition: transform 0.08s, background 0.08s, color 0.08s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .gp-nav-circle-btn svg {
+      width: 55%;
+      height: 55%;
+      fill: #1c1c1e;
+    }
+
+    .gp-nav-circle-btn.active-press {
+      background: #6c6c70;
+      transform: scale(0.92);
+    }
+    .gp-nav-circle-btn.active-press svg {
+      fill: #ffffff;
+    }
+
+    .gp-status-pill {
+      padding: 4px 16px;
+      border-radius: 999px;
+      background: #28282b;
+      border: 1.5px solid #3a3a3c;
+      color: #8e8e93;
+      font-size: clamp(11px, 2vmin, 13px);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 10px;
-      border-radius: 8px;
-      background: rgba(79, 140, 255, 0.15);
-      border: 1px solid rgba(79, 140, 255, 0.35);
-      color: #93bbfd;
-      font-size: 11px;
-      font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    /* Shoulder Triggers */
-    .gamepad-triggers-bar {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-shrink: 0;
+    .gp-status-pill.linked {
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.4);
+      background: rgba(52, 211, 153, 0.1);
     }
 
-    .trigger-cluster {
-      display: flex;
-      gap: 6px;
-      flex: 1;
-    }
-
-    .trigger-cluster.right-cluster {
-      flex-direction: row-reverse;
-    }
-
-    .gp-trigger-btn {
-      flex: 1;
-      height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(180deg, #232535 0%, #14151f 100%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--text-main);
-      font-weight: 700;
-      font-size: 13px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      transition: transform 0.08s, background 0.08s, border-color 0.08s;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .gp-trigger-btn span.label {
-      font-size: 9px;
-      font-weight: 500;
-      color: var(--text-muted);
-      letter-spacing: 0.04em;
-    }
-
-    .gp-trigger-btn.active-press {
-      background: linear-gradient(180deg, rgba(79, 140, 255, 0.4) 0%, rgba(37, 99, 235, 0.6) 100%);
-      border-color: #60a5fa;
-      box-shadow: 0 0 16px rgba(79, 140, 255, 0.5), inset 0 2px 6px rgba(0, 0, 0, 0.6);
-      transform: scale(0.96) translateY(2px);
-    }
-
-    /* Main Gamepad Deck Body */
-    .gamepad-deck {
-      flex: 1;
-      display: flex;
-      gap: 8px;
-      min-height: 0;
-      background: linear-gradient(175deg, #181924 0%, #0e0f16 100%);
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      padding: 8px;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 12px 36px rgba(0, 0, 0, 0.6);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .deck-wing {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      align-items: center;
-      position: relative;
-      min-height: 0;
-    }
-
-    .deck-center {
-      width: 58px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-around;
-      padding: 8px 0;
-      flex-shrink: 0;
-    }
-
-    .gp-center-btn {
-      width: 52px;
-      padding: 6px 0;
-      border-radius: 999px;
-      background: #202230;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-muted);
-      font-size: 10px;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .gp-center-btn.active-press {
-      background: #33364c;
-      color: #fff;
-    }
-
-    /* Precision D-Pad */
-    .dpad-container {
-      width: 110px;
-      height: 110px;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .dpad-btn {
-      position: absolute;
-      width: 36px;
-      height: 36px;
-      background: #202230;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #9496a8;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background 0.08s, color 0.08s;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .dpad-up { top: 0; left: 37px; border-radius: 8px 8px 0 0; }
-    .dpad-down { bottom: 0; left: 37px; border-radius: 0 0 8px 8px; }
-    .dpad-left { top: 37px; left: 0; border-radius: 8px 0 0 8px; }
-    .dpad-right { top: 37px; right: 0; border-radius: 0 8px 8px 0; }
-    .dpad-center {
-      position: absolute;
-      top: 37px;
-      left: 37px;
-      width: 36px;
-      height: 36px;
-      background: #191a24;
-      pointer-events: none;
-    }
-
-    .dpad-btn.active-press {
-      background: rgba(79, 140, 255, 0.35);
-      border-color: #60a5fa;
-      color: #fff;
-      box-shadow: 0 0 12px rgba(79, 140, 255, 0.4);
-    }
-
-    /* Virtual Analog Thumbstick */
-    .analog-stick-base {
-      width: 118px;
-      height: 118px;
+    .gp-status-pill.linked::before {
+      content: '';
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
-      background: radial-gradient(circle, #1a1b26 0%, #101119 75%);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 4px 14px rgba(0,0,0,0.5);
-      position: relative;
+      background: #34d399;
+      box-shadow: 0 0 6px #34d399;
+    }
+
+    /* Circular Gamepad Buttons (LB, LT, RB, RT, LS, RS, A, B, X, Y) */
+    .gp-round-btn {
+      width: clamp(38px, 8.5vmin, 54px);
+      height: clamp(38px, 8.5vmin, 54px);
+      border-radius: 50%;
+      background: var(--gp-btn-base);
+      border: 3px solid var(--gp-btn-border);
+      color: var(--gp-btn-text);
+      font-weight: 800;
+      font-size: clamp(12px, 2.6vmin, 16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: absolute;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      transition: transform 0.08s, background 0.08s, color 0.08s;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      z-index: 5;
+    }
+
+    .gp-round-btn span.label-text {
+      pointer-events: none;
+      letter-spacing: -0.02em;
+    }
+
+    .gp-round-btn.active-press {
+      background: var(--gp-btn-active);
+      color: #ffffff;
+      transform: scale(0.92);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.7);
+    }
+
+    /* 4-Petal Clover D-Pad */
+    .clover-dpad {
+      width: clamp(96px, 22vmin, 140px);
+      height: clamp(96px, 22vmin, 140px);
+      position: absolute;
+      touch-action: none;
+      z-index: 5;
+    }
+
+    .dpad-petal {
+      position: absolute;
+      background: var(--gp-btn-base);
+      border: 3px solid var(--gp-btn-border);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+      transition: transform 0.08s, background 0.08s;
+      touch-action: none;
+    }
+
+    .dpad-petal-up {
+      width: 44%;
+      height: 48%;
+      top: 0;
+      left: 28%;
+      border-radius: 42% 42% 16% 16% / 46% 46% 18% 18%;
+    }
+
+    .dpad-petal-down {
+      width: 44%;
+      height: 48%;
+      bottom: 0;
+      left: 28%;
+      border-radius: 16% 16% 42% 42% / 18% 18% 46% 46%;
+    }
+
+    .dpad-petal-left {
+      width: 48%;
+      height: 44%;
+      top: 28%;
+      left: 0;
+      border-radius: 42% 16% 16% 42% / 46% 18% 18% 46%;
+    }
+
+    .dpad-petal-right {
+      width: 48%;
+      height: 44%;
+      top: 28%;
+      right: 0;
+      border-radius: 16% 42% 42% 16% / 18% 46% 46% 18%;
+    }
+
+    .dpad-petal.active-press {
+      background: var(--gp-btn-active);
+      transform: scale(0.94);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.7);
+    }
+
+    /* Concentric Dual-Ring Thumbstick */
+    .concentric-stick {
+      width: clamp(92px, 22vmin, 136px);
+      height: clamp(92px, 22vmin, 136px);
+      border-radius: 50%;
+      background: var(--gp-stick-outer);
+      border: 3px solid #1c1c1e;
+      position: absolute;
       display: flex;
       align-items: center;
       justify-content: center;
       touch-action: none;
-      flex-shrink: 0;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.5);
+      z-index: 5;
     }
 
-    .analog-stick-sprint-ring {
+    .concentric-stick-outer-ring {
       position: absolute;
-      inset: 8px;
+      inset: 9%;
       border-radius: 50%;
-      border: 1px dashed rgba(79, 140, 255, 0.25);
+      background: var(--gp-stick-ring);
+      border: 2px solid #202022;
       pointer-events: none;
     }
 
-    .analog-stick-knob {
-      width: 48px;
-      height: 48px;
+    .concentric-stick-knob {
+      width: 46%;
+      height: 46%;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #383a50 0%, #1f202e 70%);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.4);
+      background: var(--gp-stick-knob);
+      border: 3px solid #2a2a2c;
       position: absolute;
       display: flex;
       align-items: center;
       justify-content: center;
       pointer-events: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
       transition: transform 0.05s ease-out;
     }
 
-    .analog-stick-knob::after {
+    .concentric-stick-knob::after {
       content: '';
-      width: 12px;
-      height: 12px;
+      width: 36%;
+      height: 36%;
       border-radius: 50%;
-      background: rgba(79, 140, 255, 0.4);
-      box-shadow: 0 0 8px rgba(79, 140, 255, 0.7);
+      background: #404044;
+      border: 1px solid #2c2c30;
     }
 
-    .analog-stick-knob.sprinting::after {
-      background: #fbbf24;
-      box-shadow: 0 0 10px #fbbf24;
+    /* ===================================================== */
+    /* LAYOUT 1 POSITIONS (Asymmetrical - Screenshot 1)     */
+    /* ===================================================== */
+    #layout1 .l1-dpad {
+      top: 6%;
+      left: 26%;
+    }
+    #layout1 .l1-stick-left {
+      bottom: 6%;
+      left: 14%;
+    }
+    #layout1 .l1-btn-ls {
+      top: 40%;
+      left: 2%;
+    }
+    #layout1 .l1-btn-lb {
+      top: 56%;
+      left: 66%;
+    }
+    #layout1 .l1-btn-lt {
+      bottom: 6%;
+      left: 66%;
     }
 
+    #layout1 .l1-stick-right {
+      top: 6%;
+      right: 26%;
+    }
+    #layout1 .l1-btn-rs {
+      top: 40%;
+      right: 2%;
+    }
+    #layout1 .l1-btn-rb {
+      top: 56%;
+      right: 66%;
+    }
+    #layout1 .l1-btn-rt {
+      bottom: 6%;
+      right: 66%;
+    }
     /* ABXY Diamond Cluster */
-    .abxy-cluster {
-      width: 118px;
-      height: 118px;
-      position: relative;
-      flex-shrink: 0;
+    #layout1 .l1-btn-y {
+      bottom: 30%;
+      right: 28%;
+    }
+    #layout1 .l1-btn-a {
+      bottom: 4%;
+      right: 28%;
+    }
+    #layout1 .l1-btn-x {
+      bottom: 17%;
+      right: 42%;
+    }
+    #layout1 .l1-btn-b {
+      bottom: 17%;
+      right: 14%;
     }
 
-    .abxy-btn {
-      position: absolute;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #202230;
-      border: 2px solid rgba(255, 255, 255, 0.12);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 800;
-      display: flex;
+    /* ===================================================== */
+    /* LAYOUT 2 POSITIONS (Symmetrical - Screenshot 2)      */
+    /* ===================================================== */
+    #layout2 .l2-btn-lt {
+      top: 4%;
+      left: 4%;
+    }
+    #layout2 .l2-btn-lb {
+      top: 15%;
+      left: 30%;
+    }
+    #layout2 .l2-dpad {
+      top: 36%;
+      left: 8%;
+    }
+    #layout2 .l2-btn-ls {
+      bottom: 4%;
+      left: 36%;
+    }
+    #layout2 .l2-stick-left {
+      bottom: 6%;
+      left: 56%;
+    }
+
+    #layout2 .l2-btn-rt {
+      top: 4%;
+      right: 4%;
+    }
+    #layout2 .l2-btn-rb {
+      top: 15%;
+      right: 30%;
+    }
+    #layout2 .l2-btn-rs {
+      bottom: 4%;
+      right: 36%;
+    }
+    #layout2 .l2-stick-right {
+      bottom: 6%;
+      right: 56%;
+    }
+    /* ABXY Diamond Cluster */
+    #layout2 .l2-btn-y {
+      top: 36%;
+      right: 20%;
+    }
+    #layout2 .l2-btn-a {
+      bottom: 22%;
+      right: 20%;
+    }
+    #layout2 .l2-btn-x {
+      top: 51%;
+      right: 34%;
+    }
+    #layout2 .l2-btn-b {
+      top: 51%;
+      right: 6%;
+    }
+
+    /* Modal for Dynamic Button Label & Key Customization */
+    .gp-edit-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.25);
-      transition: transform 0.08s, box-shadow 0.08s, filter 0.08s;
-      user-select: none;
-      -webkit-user-select: none;
+      z-index: 100000;
+      padding: 16px;
     }
 
-    .abxy-y { top: 0; left: 40px; border-color: rgba(234, 179, 8, 0.4); color: #facc15; }
-    .abxy-a { bottom: 0; left: 40px; border-color: rgba(34, 197, 94, 0.4); color: #4ade80; }
-    .abxy-x { top: 40px; left: 0; border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; }
-    .abxy-b { top: 40px; right: 0; border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
-
-    .abxy-btn.active-press {
-      transform: scale(0.92) translateY(2px);
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.7);
-      filter: brightness(1.3);
+    .gp-edit-modal.open {
+      display: flex;
     }
-    .abxy-y.active-press { background: rgba(234, 179, 8, 0.3); border-color: #facc15; box-shadow: 0 0 14px rgba(234, 179, 8, 0.6); }
-    .abxy-a.active-press { background: rgba(34, 197, 94, 0.3); border-color: #4ade80; box-shadow: 0 0 14px rgba(34, 197, 94, 0.6); }
-    .abxy-x.active-press { background: rgba(59, 130, 246, 0.3); border-color: #60a5fa; box-shadow: 0 0 14px rgba(59, 130, 246, 0.6); }
-    .abxy-b.active-press { background: rgba(239, 68, 68, 0.3); border-color: #f87171; box-shadow: 0 0 14px rgba(239, 68, 68, 0.6); }
 
-    /* Steam Deck-Style Camera Look Pad */
-    .steam-look-pad {
-      width: 118px;
-      height: 118px;
-      border-radius: 18px;
-      background: radial-gradient(circle at 50% 50%, #1e1f2b 0%, #111219 75%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 4px 14px rgba(0,0,0,0.5);
-      position: relative;
+    .gp-edit-card {
+      background: #202024;
+      border: 1px solid #3a3a3e;
+      border-radius: 16px;
+      padding: 18px;
+      width: 100%;
+      max-width: 360px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      touch-action: none;
-      cursor: crosshair;
-      flex-shrink: 0;
-      user-select: none;
-      -webkit-user-select: none;
+      gap: 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.8);
+      color: #fff;
     }
 
-    .steam-look-pad span.pad-title {
-      font-size: 10px;
+    .gp-edit-card h3 {
+      margin: 0;
+      font-size: 16px;
       font-weight: 600;
-      color: var(--text-muted);
-      letter-spacing: 0.05em;
-      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .steam-look-crosshair {
-      width: 32px;
-      height: 32px;
-      border: 1px dashed rgba(79, 140, 255, 0.3);
-      border-radius: 50%;
+    .gp-edit-card label {
+      font-size: 11px;
+      color: #8e8e93;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .gp-edit-card input, .gp-edit-card select {
+      background: #141416;
+      border: 1px solid #333336;
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .gp-edit-actions {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      gap: 8px;
       margin-top: 4px;
-      pointer-events: none;
     }
 
-    .steam-look-crosshair::after {
-      content: '';
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 6px var(--accent);
+    .gp-edit-actions button {
+      flex: 1;
+      padding: 9px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
     }
 
-    /* Active Keys HUD */
-    .gamepad-keys-hud {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-align: center;
-      font-family: monospace;
-      padding: 3px 6px;
-      background: rgba(14, 15, 21, 0.7);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      min-height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
+    .gp-btn-save { background: var(--accent); color: #fff; }
+    .gp-btn-cancel { background: #333336; color: #bbb; }
 
     /* ==================== Keyboard View ==================== */
     .card {
@@ -979,7 +1145,6 @@
 
         <!-- Monolithic Glass Trackpad Surface -->
         <div class="mac-trackpad-frame" id="macTrackpad">
-          <!-- Active Motion Area (1-finger / 2-finger) -->
           <div class="trackpad-motion-zone" id="motionZone">
             <div class="trackpad-center-mark"></div>
             <div id="dragPill" class="drag-pill">DRAGGING</div>
@@ -989,7 +1154,6 @@
           <div class="trackpad-click-strip">
             <div class="click-divider"></div>
             
-            <!-- Left Click Zone -->
             <div class="click-zone" id="leftClickZone">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="6" y="3" width="12" height="18" rx="6"></rect>
@@ -999,7 +1163,6 @@
               <span>Left Click</span>
             </div>
 
-            <!-- Right Click Zone -->
             <div class="click-zone" id="rightClickZone">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="6" y="3" width="12" height="18" rx="6"></rect>
@@ -1021,101 +1184,205 @@
         </div>
       </div>
 
-      <!-- ==================== Gamepad View ==================== -->
+      <!-- ================================================================ -->
+      <!-- ==================== GAMEPAD SCREENSHOT VIEW =================== -->
+      <!-- ================================================================ -->
       <div id="view-gamepad" class="view">
-        <!-- Gamepad HUD -->
-        <div class="gamepad-hud">
-          <div class="preset-selector">
-            <span>🎮 Preset:</span>
-            <select id="gpPresetSelect">
-              <option value="fps">FPS / Action (WASD + Mouse)</option>
-              <option value="racing">Racing / Driving</option>
-              <option value="platformer">Platformer / Retro</option>
+        <div class="gamepad-fullscreen-canvas" id="gpCanvas">
+          <!-- Top Row: Layout 1 dot, Layout 2 dot, Connection Beacon -->
+          <div class="gp-top-row">
+            <button class="gp-dot-toggle active" id="dotLayout1" title="Layout 1 (Asymmetric)"></button>
+            <button class="gp-dot-toggle" id="dotLayout2" title="Layout 2 (Symmetric)"></button>
+            <div class="gp-wifi-beacon" id="gpWifiBeacon" title="Connection status">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Viewport containing both layouts -->
+          <div class="gp-layout-viewport">
+            <!-- ==================== LAYOUT 1 (Asymmetric - Screenshot 1) ==================== -->
+            <div class="gp-layout-stage active" id="layout1">
+              <!-- Left Wing -->
+              <div class="gp-wing-left">
+                <!-- Clover Petal D-Pad (Top) -->
+                <div class="clover-dpad l1-dpad">
+                  <div class="dpad-petal dpad-petal-up" data-control="dpad_up"></div>
+                  <div class="dpad-petal dpad-petal-left" data-control="dpad_left"></div>
+                  <div class="dpad-petal dpad-petal-right" data-control="dpad_right"></div>
+                  <div class="dpad-petal dpad-petal-down" data-control="dpad_down"></div>
+                </div>
+
+                <!-- LS Button (Left) -->
+                <div class="gp-round-btn l1-btn-ls" data-control="ls"><span class="label-text">LS</span></div>
+
+                <!-- Concentric Left Stick (Bottom) -->
+                <div class="concentric-stick l1-stick-left" id="l1StickLeft">
+                  <div class="concentric-stick-outer-ring"></div>
+                  <div class="concentric-stick-knob" id="l1KnobLeft"></div>
+                </div>
+
+                <!-- LB & LT Buttons (Right of stick) -->
+                <div class="gp-round-btn l1-btn-lb" data-control="lb"><span class="label-text">LB</span></div>
+                <div class="gp-round-btn l1-btn-lt" data-control="lt"><span class="label-text">LT</span></div>
+              </div>
+
+              <!-- Center Console -->
+              <div class="gp-wing-center">
+                <div class="gp-center-nav-buttons">
+                  <button class="gp-nav-circle-btn" data-control="select" id="gpNavBack" title="Back / Select">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                  </button>
+                  <button class="gp-nav-circle-btn" id="gpNavGyro" title="Gyro Sensor Steering">
+                    <svg viewBox="0 0 24 24"><path d="M16 1H8C6.34 1 5 2.34 5 4v16c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm1 18c0 .55-.45 1-1 1H8c-.55 0-1-.45-1-1V5c0-.55.45-1 1-1h8c.55 0 1 .45 1 1v14z"/><circle cx="12" cy="12" r="2"/></svg>
+                  </button>
+                  <button class="gp-nav-circle-btn" data-control="start" id="gpNavPlay" title="Play / Start">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  </button>
+                </div>
+
+                <!-- Status Pill Badge -->
+                <div class="gp-status-pill" id="gpStatusPill" title="Tap to switch label modes">Unlinked</div>
+              </div>
+
+              <!-- Right Wing -->
+              <div class="gp-wing-right">
+                <!-- Concentric Right Stick (Top) -->
+                <div class="concentric-stick l1-stick-right" id="l1StickRight">
+                  <div class="concentric-stick-outer-ring"></div>
+                  <div class="concentric-stick-knob" id="l1KnobRight"></div>
+                </div>
+
+                <!-- RS Button (Right of stick) -->
+                <div class="gp-round-btn l1-btn-rs" data-control="rs"><span class="label-text">RS</span></div>
+
+                <!-- RB & RT Buttons (Left of ABXY) -->
+                <div class="gp-round-btn l1-btn-rb" data-control="rb"><span class="label-text">RB</span></div>
+                <div class="gp-round-btn l1-btn-rt" data-control="rt"><span class="label-text">RT</span></div>
+
+                <!-- ABXY Diamond (Bottom) -->
+                <div class="gp-round-btn l1-btn-y" data-control="btn_y"><span class="label-text">Y</span></div>
+                <div class="gp-round-btn l1-btn-x" data-control="btn_x"><span class="label-text">X</span></div>
+                <div class="gp-round-btn l1-btn-b" data-control="btn_b"><span class="label-text">B</span></div>
+                <div class="gp-round-btn l1-btn-a" data-control="btn_a"><span class="label-text">A</span></div>
+              </div>
+            </div>
+
+            <!-- ==================== LAYOUT 2 (Symmetrical - Screenshot 2) ==================== -->
+            <div class="gp-layout-stage" id="layout2">
+              <!-- Left Wing -->
+              <div class="gp-wing-left">
+                <!-- LT & LB at Top Left -->
+                <div class="gp-round-btn l2-btn-lt" data-control="lt"><span class="label-text">LT</span></div>
+                <div class="gp-round-btn l2-btn-lb" data-control="lb"><span class="label-text">LB</span></div>
+
+                <!-- Clover Petal D-Pad (Middle) -->
+                <div class="clover-dpad l2-dpad">
+                  <div class="dpad-petal dpad-petal-up" data-control="dpad_up"></div>
+                  <div class="dpad-petal dpad-petal-left" data-control="dpad_left"></div>
+                  <div class="dpad-petal dpad-petal-right" data-control="dpad_right"></div>
+                  <div class="dpad-petal dpad-petal-down" data-control="dpad_down"></div>
+                </div>
+
+                <!-- LS Button (Bottom Left) -->
+                <div class="gp-round-btn l2-btn-ls" data-control="ls"><span class="label-text">LS</span></div>
+
+                <!-- Concentric Left Stick (Bottom Right) -->
+                <div class="concentric-stick l2-stick-left" id="l2StickLeft">
+                  <div class="concentric-stick-outer-ring"></div>
+                  <div class="concentric-stick-knob" id="l2KnobLeft"></div>
+                </div>
+              </div>
+
+              <!-- Center Console (Re-used) -->
+              <div class="gp-wing-center">
+                <div class="gp-center-nav-buttons">
+                  <button class="gp-nav-circle-btn" data-control="select">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                  </button>
+                  <button class="gp-nav-circle-btn" id="gpNavGyro2">
+                    <svg viewBox="0 0 24 24"><path d="M16 1H8C6.34 1 5 2.34 5 4v16c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm1 18c0 .55-.45 1-1 1H8c-.55 0-1-.45-1-1V5c0-.55.45-1 1-1h8c.55 0 1 .45 1 1v14z"/><circle cx="12" cy="12" r="2"/></svg>
+                  </button>
+                  <button class="gp-nav-circle-btn" data-control="start">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  </button>
+                </div>
+                <div class="gp-status-pill gp-status-pill-sync">Unlinked</div>
+              </div>
+
+              <!-- Right Wing -->
+              <div class="gp-wing-right">
+                <!-- RT & RB at Top Right -->
+                <div class="gp-round-btn l2-btn-rt" data-control="rt"><span class="label-text">RT</span></div>
+                <div class="gp-round-btn l2-btn-rb" data-control="rb"><span class="label-text">RB</span></div>
+
+                <!-- ABXY Diamond (Middle) -->
+                <div class="gp-round-btn l2-btn-y" data-control="btn_y"><span class="label-text">Y</span></div>
+                <div class="gp-round-btn l2-btn-x" data-control="btn_x"><span class="label-text">X</span></div>
+                <div class="gp-round-btn l2-btn-b" data-control="btn_b"><span class="label-text">B</span></div>
+                <div class="gp-round-btn l2-btn-a" data-control="btn_a"><span class="label-text">A</span></div>
+
+                <!-- RS Button (Bottom Right) -->
+                <div class="gp-round-btn l2-btn-rs" data-control="rs"><span class="label-text">RS</span></div>
+
+                <!-- Concentric Right Stick (Bottom Left) -->
+                <div class="concentric-stick l2-stick-right" id="l2StickRight">
+                  <div class="concentric-stick-outer-ring"></div>
+                  <div class="concentric-stick-knob" id="l2KnobRight"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inline Button Customization Modal -->
+        <div class="gp-edit-modal" id="gpEditModal">
+          <div class="gp-edit-card">
+            <h3>Customize Button <span id="editBtnIdBadge" style="opacity:0.6; font-size:12px;"></span></h3>
+            
+            <label>Button Display Text</label>
+            <input type="text" id="editBtnLabelInput" maxlength="6" placeholder="e.g. A, FIRE, JUMP" />
+
+            <label>Assigned PC Key / Action</label>
+            <select id="editBtnKeySelect">
+              <option value="space">Space (Jump)</option>
+              <option value="mouse_left">Left Click (Fire / Attack)</option>
+              <option value="mouse_right">Right Click (Aim)</option>
+              <option value="shift">Shift (Sprint / Run)</option>
+              <option value="ctrl">Ctrl (Crouch / Walk)</option>
+              <option value="alt">Alt (Dodge / Roll)</option>
+              <option value="tab">Tab (Scoreboard / Map)</option>
+              <option value="esc">Esc (Pause / Menu)</option>
+              <option value="enter">Enter</option>
+              <option value="e">E (Interact / Use)</option>
+              <option value="r">R (Reload)</option>
+              <option value="f">F (Melee / Action)</option>
+              <option value="q">Q (Skill / Grenade)</option>
+              <option value="c">C (Crouch / Slide)</option>
+              <option value="v">V (Melee)</option>
+              <option value="z">Z (Prone / Ability)</option>
+              <option value="x">X (Special)</option>
+              <option value="n">N (Nitro)</option>
+              <option value="1">1 (Weapon 1)</option>
+              <option value="2">2 (Weapon 2)</option>
+              <option value="3">3 (Weapon 3)</option>
+              <option value="4">4 (Weapon 4)</option>
+              <option value="up">Arrow Up</option>
+              <option value="down">Arrow Down</option>
+              <option value="left">Arrow Left</option>
+              <option value="right">Arrow Right</option>
             </select>
-          </div>
 
-          <button id="gpFullscreenBtn" class="fullscreen-btn">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-            </svg>
-            Fullscreen
-          </button>
-        </div>
-
-        <!-- Shoulder Triggers Bar -->
-        <div class="gamepad-triggers-bar">
-          <!-- Left Triggers (LT, LB) -->
-          <div class="trigger-cluster">
-            <div class="gp-trigger-btn" data-control="lt" id="gpBtnLT">
-              <span>LT</span>
-              <span class="label" id="gpLabelLT">AIM</span>
-            </div>
-            <div class="gp-trigger-btn bumper" data-control="lb" id="gpBtnLB">
-              <span>LB</span>
-              <span class="label" id="gpLabelLB">Q</span>
-            </div>
-          </div>
-
-          <!-- Right Triggers (RT, RB) -->
-          <div class="trigger-cluster right-cluster">
-            <div class="gp-trigger-btn" data-control="rt" id="gpBtnRT">
-              <span>RT</span>
-              <span class="label" id="gpLabelRT">FIRE</span>
-            </div>
-            <div class="gp-trigger-btn bumper" data-control="rb" id="gpBtnRB">
-              <span>RB</span>
-              <span class="label" id="gpLabelRB">F</span>
+            <div class="gp-edit-actions">
+              <button class="gp-btn-save" id="btnSaveMapping">Save</button>
+              <button class="gp-btn-cancel" id="btnCancelMapping">Cancel</button>
             </div>
           </div>
         </div>
-
-        <!-- Main Gamepad Deck -->
-        <div class="gamepad-deck">
-          <!-- Left Wing: Thumbstick & D-Pad -->
-          <div class="deck-wing">
-            <!-- D-Pad -->
-            <div class="dpad-container" id="gpDpad">
-              <div class="dpad-btn dpad-up" data-control="dpad_up">▲</div>
-              <div class="dpad-btn dpad-left" data-control="dpad_left">◀</div>
-              <div class="dpad-center"></div>
-              <div class="dpad-btn dpad-right" data-control="dpad_right">▶</div>
-              <div class="dpad-btn dpad-down" data-control="dpad_down">▼</div>
-            </div>
-
-            <!-- Virtual Analog Stick -->
-            <div class="analog-stick-base" id="gpAnalogStick">
-              <div class="analog-stick-sprint-ring"></div>
-              <div class="analog-stick-knob" id="gpStickKnob"></div>
-            </div>
-          </div>
-
-          <!-- Center Console: Select, Start, Logo -->
-          <div class="deck-center">
-            <button class="gp-center-btn" data-control="select" id="gpBtnSelect">VIEW</button>
-            <div style="font-size:18px; opacity:0.4;">⚡</div>
-            <button class="gp-center-btn" data-control="start" id="gpBtnStart">MENU</button>
-          </div>
-
-          <!-- Right Wing: ABXY & Steam Look Trackpad -->
-          <div class="deck-wing">
-            <!-- ABXY Diamond -->
-            <div class="abxy-cluster" id="gpAbxy">
-              <div class="abxy-btn abxy-y" data-control="btn_y" id="gpBtnY">Y</div>
-              <div class="abxy-btn abxy-x" data-control="btn_x" id="gpBtnX">X</div>
-              <div class="abxy-btn abxy-b" data-control="btn_b" id="gpBtnB">B</div>
-              <div class="abxy-btn abxy-a" data-control="btn_a" id="gpBtnA">A</div>
-            </div>
-
-            <!-- Steam Deck-Style Camera Look Pad -->
-            <div class="steam-look-pad" id="steamLookPad">
-              <span class="pad-title">AIM / CAMERA</span>
-              <div class="steam-look-crosshair"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active Keys HUD -->
-        <div class="gamepad-keys-hud" id="gpActiveKeysHud">Active: None</div>
       </div>
 
       <!-- Keyboard View -->
@@ -1196,20 +1463,37 @@
     const hapticBadge = document.getElementById("hapticBadge");
     const dragPill = document.getElementById("dragPill");
 
-    socket.on("connect", () => {
-      statusEl.textContent = "Connected ✔";
-      statusEl.style.color = "#4ade80";
-    });
+    // Gamepad center status indicator
+    const gpWifiBeacon = document.getElementById("gpWifiBeacon");
+    const gpStatusPills = document.querySelectorAll(".gp-status-pill");
 
-    socket.on("disconnect", () => {
-      statusEl.textContent = "Disconnected ✖";
-      statusEl.style.color = "";
-    });
+    function setConnectionStatus(connected) {
+      if (connected) {
+        statusEl.textContent = "Connected ✔";
+        statusEl.style.color = "#4ade80";
+        if (gpWifiBeacon) gpWifiBeacon.classList.add("connected");
+        gpStatusPills.forEach(pill => {
+          pill.textContent = "Linked";
+          pill.classList.add("linked");
+        });
+      } else {
+        statusEl.textContent = "Disconnected ✖";
+        statusEl.style.color = "";
+        if (gpWifiBeacon) gpWifiBeacon.classList.remove("connected");
+        gpStatusPills.forEach(pill => {
+          pill.textContent = "Unlinked";
+          pill.classList.remove("linked");
+        });
+      }
+    }
 
+    socket.on("connect", () => setConnectionStatus(true));
+    socket.on("disconnect", () => setConnectionStatus(false));
     socket.on("connect_error", (err) => {
       console.error("Socket error:", err);
       statusEl.textContent = "Reconnecting...";
       statusEl.style.color = "#f87171";
+      setConnectionStatus(false);
     });
 
     // ==================== Tabs Switcher ====================
@@ -1229,9 +1513,17 @@
           el.classList.toggle("active", name === viewName);
         });
 
-        // If leaving gamepad view, release all active keys
+        // Leaving gamepad view: release all keys
         if (viewName !== "gamepad") {
           socket.emit("gamepad_release_all");
+          if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+          }
+        } else {
+          // Entering gamepad view: try to lock landscape orientation if supported
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock("landscape").catch(() => {});
+          }
         }
       });
     });
@@ -1248,24 +1540,24 @@
 
       try {
         switch (type) {
-          case "click": // Crisp single click
+          case "click":
             navigator.vibrate(14);
             break;
-          case "rightClick": // Distinct double pulse
+          case "rightClick":
             navigator.vibrate([18, 30, 22]);
             break;
-          case "tap": // Ultra-light micro-tick
+          case "tap":
             navigator.vibrate(10);
             break;
-          case "dragStart": // Solid lock feedback
+          case "dragStart":
             navigator.vibrate(30);
             break;
-          case "scroll": // Micro tick
+          case "scroll":
             navigator.vibrate(6);
             break;
           // Gamepad specific waveforms
-          case "gpTrigger": // Deep trigger recoil
-            navigator.vibrate(35);
+          case "gpTrigger": // Deep recoil
+            navigator.vibrate(32);
             break;
           case "gpButton": // Crisp mechanical face button
             navigator.vibrate(14);
@@ -1273,18 +1565,15 @@
           case "gpBumper": // Snappy bumper switch
             navigator.vibrate(18);
             break;
-          case "gpDpad": // Micro directional click
-            navigator.vibrate(10);
+          case "gpDpad": // Micro directional petal tick
+            navigator.vibrate(12);
             break;
-          case "gpSprint": // Sprint ring activation
-            navigator.vibrate([14, 28, 18]);
-            break;
-          case "gpCameraTick": // Micro trackball bearing tick
-            navigator.vibrate(5);
+          case "gpSwitch": // Layout switch pulse
+            navigator.vibrate([10, 20, 10]);
             break;
         }
       } catch (e) {
-        // Safe catch for browser restrictions
+        // Safe catch
       }
     }
 
@@ -1321,7 +1610,7 @@
       };
     }
 
-    // ==================== rAF Batching (Jitter-free Motion) ====================
+    // ==================== rAF Batching ====================
     let accumulatedDx = 0;
     let accumulatedDy = 0;
     let rafScheduled = false;
@@ -1569,7 +1858,7 @@
       }
     });
 
-    // ==================== Integrated Click Zones ====================
+    // Integrated Click Zones
     function setupClickZone(el, buttonName) {
       let isPressed = false;
 
@@ -1633,148 +1922,243 @@
       isDesktopMouseDown = false;
     });
 
-    // ============================================================
-    // ==================== GAMEPAD CONTROLLER ====================
-    // ============================================================
+    // ================================================================
+    // ==================== SCREENSHOT GAMEPAD ENGINE =================
+    // ================================================================
 
-    const GAMEPAD_PRESETS = {
-      fps: {
-        name: "FPS / Action",
-        stick: { up: "w", down: "s", left: "a", right: "d", sprint: "shift" },
-        dpad_up: "1",
-        dpad_down: "3",
-        dpad_left: "2",
-        dpad_right: "4",
-        btn_a: "space",
-        btn_b: "c",
-        btn_x: "r",
-        btn_y: "e",
-        lb: "q",
-        rb: "f",
-        lt: "mouse_right",
-        rt: "mouse_left",
-        select: "tab",
-        start: "esc",
-        labels: { lt: "AIM", lb: "Q", rt: "FIRE", rb: "F" }
-      },
-      racing: {
-        name: "Racing / Driving",
-        stick: { up: "w", down: "s", left: "a", right: "d", sprint: null },
-        dpad_up: "up",
-        dpad_down: "down",
-        dpad_left: "left",
-        dpad_right: "right",
-        btn_a: "space",
-        btn_b: "c",
-        btn_x: "r",
-        btn_y: "n",
-        lb: "q",
-        rb: "e",
-        lt: "s",
-        rt: "w",
-        select: "tab",
-        start: "esc",
-        labels: { lt: "BRAKE", lb: "GEAR-", rt: "GAS", rb: "GEAR+" }
-      },
-      platformer: {
-        name: "Platformer / Retro",
-        stick: { up: "up", down: "down", left: "left", right: "right", sprint: null },
-        dpad_up: "up",
-        dpad_down: "down",
-        dpad_left: "left",
-        dpad_right: "right",
-        btn_a: "space",
-        btn_b: "down",
-        btn_x: "x",
-        btn_y: "c",
-        lb: "z",
-        rb: "shift",
-        lt: "ctrl",
-        rt: "alt",
-        select: "enter",
-        start: "esc",
-        labels: { lt: "CTRL", lb: "Z", rt: "ALT", rb: "DASH" }
-      }
+    // Dynamic Button Config Model (Stored & Customizable)
+    const DEFAULT_BUTTON_MAPPINGS = {
+      btn_a: { label: "A", key: "space", action: "JUMP" },
+      btn_b: { label: "B", key: "c", action: "CROUCH" },
+      btn_x: { label: "X", key: "r", action: "RELOAD" },
+      btn_y: { label: "Y", key: "e", action: "USE" },
+      lb:    { label: "LB", key: "q", action: "GRENADE" },
+      rb:    { label: "RB", key: "f", action: "MELEE" },
+      lt:    { label: "LT", key: "mouse_right", action: "AIM" },
+      rt:    { label: "RT", key: "mouse_left", action: "FIRE" },
+      ls:    { label: "LS", key: "shift", action: "SPRINT" },
+      rs:    { label: "RS", key: "v", action: "MELEE" },
+      dpad_up:    { label: "▲", key: "1", action: "WEAPON 1" },
+      dpad_down:  { label: "▼", key: "3", action: "WEAPON 3" },
+      dpad_left:  { label: "◀", key: "2", action: "WEAPON 2" },
+      dpad_right: { label: "▶", key: "4", action: "WEAPON 4" },
+      select: { label: "←", key: "tab", action: "MAP" },
+      start:  { label: "▶", key: "esc", action: "MENU" }
     };
 
-    let currentPresetKey = "fps";
-    let activePreset = GAMEPAD_PRESETS[currentPresetKey];
-
-    const gpPresetSelect = document.getElementById("gpPresetSelect");
-    const gpFullscreenBtn = document.getElementById("gpFullscreenBtn");
-    const gpActiveKeysHud = document.getElementById("gpActiveKeysHud");
-
-    // Triggers and labels
-    const gpLabelLT = document.getElementById("gpLabelLT");
-    const gpLabelLB = document.getElementById("gpLabelLB");
-    const gpLabelRT = document.getElementById("gpLabelRT");
-    const gpLabelRB = document.getElementById("gpLabelRB");
-
-    function updatePresetLabels() {
-      if (activePreset.labels) {
-        gpLabelLT.textContent = activePreset.labels.lt;
-        gpLabelLB.textContent = activePreset.labels.lb;
-        gpLabelRT.textContent = activePreset.labels.rt;
-        gpLabelRB.textContent = activePreset.labels.rb;
-      }
+    let userButtonMappings = JSON.parse(localStorage.getItem("remote_mouse_gp_mappings") || "null");
+    if (!userButtonMappings) {
+      userButtonMappings = JSON.parse(JSON.stringify(DEFAULT_BUTTON_MAPPINGS));
     }
-    updatePresetLabels();
 
-    gpPresetSelect.addEventListener("change", (e) => {
-      currentPresetKey = e.target.value;
-      activePreset = GAMEPAD_PRESETS[currentPresetKey] || GAMEPAD_PRESETS.fps;
-      updatePresetLabels();
-      triggerHaptic("gpButton");
+    // Dynamic Label Modes: "controller" | "action" | "key"
+    let currentLabelMode = localStorage.getItem("remote_mouse_gp_label_mode") || "controller";
+
+    function updateAllButtonLabels() {
+      document.querySelectorAll("[data-control]").forEach(el => {
+        const controlId = el.dataset.control;
+        const cfg = userButtonMappings[controlId];
+        if (!cfg) return;
+
+        const labelSpan = el.querySelector(".label-text");
+        if (labelSpan) {
+          if (currentLabelMode === "action" && cfg.action) {
+            labelSpan.textContent = cfg.action;
+          } else if (currentLabelMode === "key" && cfg.key) {
+            labelSpan.textContent = cfg.key.toUpperCase();
+          } else {
+            labelSpan.textContent = cfg.label || controlId.toUpperCase();
+          }
+        }
+      });
+    }
+    updateAllButtonLabels();
+
+    // Toggle Label Mode when clicking the Status Pill
+    gpStatusPills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        triggerHaptic("gpSwitch");
+        if (currentLabelMode === "controller") {
+          currentLabelMode = "action";
+        } else if (currentLabelMode === "action") {
+          currentLabelMode = "key";
+        } else {
+          currentLabelMode = "controller";
+        }
+        localStorage.setItem("remote_mouse_gp_label_mode", currentLabelMode);
+        updateAllButtonLabels();
+      });
+    });
+
+    // Layout Switcher (Dot 1 vs Dot 2)
+    const dotLayout1 = document.getElementById("dotLayout1");
+    const dotLayout2 = document.getElementById("dotLayout2");
+    const layout1Stage = document.getElementById("layout1");
+    const layout2Stage = document.getElementById("layout2");
+
+    function setActiveLayout(layoutNum) {
+      triggerHaptic("gpSwitch");
+      if (layoutNum === 1) {
+        dotLayout1.classList.add("active");
+        dotLayout2.classList.remove("active");
+        layout1Stage.classList.add("active");
+        layout2Stage.classList.remove("active");
+      } else {
+        dotLayout1.classList.remove("active");
+        dotLayout2.classList.add("active");
+        layout1Stage.classList.remove("active");
+        layout2Stage.classList.add("active");
+      }
       socket.emit("gamepad_release_all");
-      updateHudKeys();
-    });
+    }
 
-    // Fullscreen Toggle
-    gpFullscreenBtn.addEventListener("click", () => {
-      triggerHaptic("click");
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
+    dotLayout1.addEventListener("click", () => setActiveLayout(1));
+    dotLayout2.addEventListener("click", () => setActiveLayout(2));
+
+    // Fullscreen Toggle on Wifi Beacon / Top Double Click
+    const gpCanvas = document.getElementById("gpCanvas");
+    if (gpWifiBeacon) {
+      gpWifiBeacon.addEventListener("click", () => {
+        triggerHaptic("click");
+        if (!document.fullscreenElement) {
+          gpCanvas.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+    }
+
+    // Gyroscope Motion Steering / Aiming Toggle
+    let gyroActive = false;
+    let initialGamma = null;
+    let initialBeta = null;
+
+    function handleDeviceOrientation(e) {
+      if (!gyroActive || e.gamma === null || e.beta === null) return;
+      if (initialGamma === null) {
+        initialGamma = e.gamma;
+        initialBeta = e.beta;
+        return;
       }
-    });
 
-    // Tracking active pressed keys for HUD
-    const activeHudKeys = new Set();
+      // Delta tilt
+      const dGamma = e.gamma - initialGamma; // Roll / Steering
+      const dBeta = e.beta - initialBeta;   // Pitch / Up-Down
 
-    function updateHudKeys() {
-      if (activeHudKeys.size === 0) {
-        gpActiveKeysHud.textContent = `Preset: ${activePreset.name} • Ready`;
-      } else {
-        const list = Array.from(activeHudKeys).map(k => `[${k.toUpperCase()}]`).join(" ");
-        gpActiveKeysHud.textContent = `Active: ${list}`;
+      // Send subtle mouse aim or steer
+      if (Math.abs(dGamma) > 1.5 || Math.abs(dBeta) > 1.5) {
+        queuePointerMove(dGamma * 0.4, -dBeta * 0.4);
       }
     }
 
-    // Generic Button Press / Release Binder
-    function bindGamepadButton(el, controlId, hapticType = "gpButton") {
-      if (!el) return;
+    function toggleGyro(btn) {
+      triggerHaptic("gpButton");
+      gyroActive = !gyroActive;
+      initialGamma = null;
+      initialBeta = null;
+
+      document.querySelectorAll("#gpNavGyro, #gpNavGyro2").forEach(b => {
+        b.classList.toggle("active-press", gyroActive);
+      });
+
+      if (gyroActive) {
+        if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+          DeviceOrientationEvent.requestPermission().then(response => {
+            if (response === "granted") {
+              window.addEventListener("deviceorientation", handleDeviceOrientation);
+            }
+          }).catch(() => {});
+        } else {
+          window.addEventListener("deviceorientation", handleDeviceOrientation);
+        }
+      } else {
+        window.removeEventListener("deviceorientation", handleDeviceOrientation);
+      }
+    }
+
+    const btnGyro1 = document.getElementById("gpNavGyro");
+    const btnGyro2 = document.getElementById("gpNavGyro2");
+    if (btnGyro1) btnGyro1.addEventListener("click", () => toggleGyro(btnGyro1));
+    if (btnGyro2) btnGyro2.addEventListener("click", () => toggleGyro(btnGyro2));
+
+    // Button Binding with Long-Press Customization Modal
+    let editingControlId = null;
+    const gpEditModal = document.getElementById("gpEditModal");
+    const editBtnIdBadge = document.getElementById("editBtnIdBadge");
+    const editBtnLabelInput = document.getElementById("editBtnLabelInput");
+    const editBtnKeySelect = document.getElementById("editBtnKeySelect");
+    const btnSaveMapping = document.getElementById("btnSaveMapping");
+    const btnCancelMapping = document.getElementById("btnCancelMapping");
+
+    function openEditModal(controlId) {
+      editingControlId = controlId;
+      const cfg = userButtonMappings[controlId] || { label: controlId.toUpperCase(), key: "space", action: "" };
+      editBtnIdBadge.textContent = controlId.toUpperCase();
+      editBtnLabelInput.value = cfg.label || "";
+      editBtnKeySelect.value = cfg.key || "space";
+      gpEditModal.classList.add("open");
+      triggerHaptic("gpButton");
+    }
+
+    function closeEditModal() {
+      gpEditModal.classList.remove("open");
+      editingControlId = null;
+    }
+
+    btnCancelMapping.addEventListener("click", closeEditModal);
+    btnSaveMapping.addEventListener("click", () => {
+      if (editingControlId && userButtonMappings[editingControlId]) {
+        userButtonMappings[editingControlId].label = editBtnLabelInput.value.trim() || editingControlId.toUpperCase();
+        userButtonMappings[editingControlId].key = editBtnKeySelect.value;
+        localStorage.setItem("remote_mouse_gp_mappings", JSON.stringify(userButtonMappings));
+        updateAllButtonLabels();
+        triggerHaptic("click");
+      }
+      closeEditModal();
+    });
+
+    function setupUniversalGamepadButton(el) {
+      const controlId = el.dataset.control;
+      if (!controlId) return;
+
+      let pressTimer = null;
+      let isLongPressed = false;
 
       function onDown(e) {
         if (e.cancelable) e.preventDefault();
         el.classList.add("active-press");
-        triggerHaptic(hapticType);
 
-        const mappedKey = activePreset[controlId];
-        if (mappedKey) {
-          activeHudKeys.add(mappedKey);
-          updateHudKeys();
-          socket.emit("gamepad_button_down", { input: mappedKey });
+        // Determine haptic signature based on button type
+        if (controlId === "lt" || controlId === "rt") {
+          triggerHaptic("gpTrigger");
+        } else if (controlId === "lb" || controlId === "rb") {
+          triggerHaptic("gpBumper");
+        } else if (controlId.startsWith("dpad_")) {
+          triggerHaptic("gpDpad");
+        } else {
+          triggerHaptic("gpButton");
         }
+
+        const cfg = userButtonMappings[controlId];
+        if (cfg && cfg.key) {
+          socket.emit("gamepad_button_down", { input: cfg.key });
+        }
+
+        // Long press for customization (750ms)
+        isLongPressed = false;
+        clearTimeout(pressTimer);
+        pressTimer = setTimeout(() => {
+          isLongPressed = true;
+          openEditModal(controlId);
+        }, 750);
       }
 
-      function onUp(e) {
+      function onUp() {
+        clearTimeout(pressTimer);
         el.classList.remove("active-press");
-        const mappedKey = activePreset[controlId];
-        if (mappedKey) {
-          activeHudKeys.delete(mappedKey);
-          updateHudKeys();
-          socket.emit("gamepad_button_up", { input: mappedKey });
+        const cfg = userButtonMappings[controlId];
+        if (cfg && cfg.key) {
+          socket.emit("gamepad_button_up", { input: cfg.key });
         }
       }
 
@@ -1787,249 +2171,131 @@
       el.addEventListener("mouseleave", onUp);
     }
 
-    // Bind triggers & bumpers
-    bindGamepadButton(document.getElementById("gpBtnLT"), "lt", "gpTrigger");
-    bindGamepadButton(document.getElementById("gpBtnRT"), "rt", "gpTrigger");
-    bindGamepadButton(document.getElementById("gpBtnLB"), "lb", "gpBumper");
-    bindGamepadButton(document.getElementById("gpBtnRB"), "rb", "gpBumper");
+    document.querySelectorAll(".gp-round-btn, .dpad-petal, .gp-nav-circle-btn[data-control]").forEach(setupUniversalGamepadButton);
 
-    // Bind ABXY buttons
-    bindGamepadButton(document.getElementById("gpBtnA"), "btn_a", "gpButton");
-    bindGamepadButton(document.getElementById("gpBtnB"), "btn_b", "gpButton");
-    bindGamepadButton(document.getElementById("gpBtnX"), "btn_x", "gpButton");
-    bindGamepadButton(document.getElementById("gpBtnY"), "btn_y", "gpButton");
+    // ==================== Concentric Dual-Stick Handler ====================
+    function setupConcentricThumbstick(baseEl, knobEl, isRightStick = false) {
+      if (!baseEl || !knobEl) return;
 
-    // Bind D-Pad
-    document.querySelectorAll(".dpad-btn").forEach(btn => {
-      const controlId = btn.dataset.control;
-      bindGamepadButton(btn, controlId, "gpDpad");
-    });
+      let stickTouchId = null;
+      let centerX = 0;
+      let centerY = 0;
+      let maxRadius = 38;
+      let lastKeysStr = "";
 
-    // Bind Center Menu / View
-    bindGamepadButton(document.getElementById("gpBtnSelect"), "select", "gpButton");
-    bindGamepadButton(document.getElementById("gpBtnStart"), "start", "gpButton");
+      baseEl.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        if (stickTouchId !== null) return;
 
-    // ==================== Virtual Analog Thumbstick ====================
-    const gpAnalogStick = document.getElementById("gpAnalogStick");
-    const gpStickKnob = document.getElementById("gpStickKnob");
-    let stickTouchId = null;
-    let stickCenterX = 0;
-    let stickCenterY = 0;
-    const STICK_MAX_RADIUS = 38; // px
-    let isSprinting = false;
-    let lastStickKeysString = "";
+        const t = e.changedTouches[0];
+        stickTouchId = t.identifier;
+        const rect = baseEl.getBoundingClientRect();
+        centerX = rect.left + rect.width / 2;
+        centerY = rect.top + rect.height / 2;
+        maxRadius = rect.width * 0.32;
 
-    function getStickKeys(normX, normY, isSprintActive) {
-      const dist = Math.hypot(normX, normY);
-      if (dist < 0.2) return [];
+        handleMove(t.clientX, t.clientY);
+      }, { passive: false });
 
-      const keys = [];
-      const angle = Math.atan2(normY, normX); // radians from -PI to +PI
-      const cfg = activePreset.stick;
-
-      // 8-directional quadrant thresholds
-      const octant = Math.PI / 8;
-      if (angle >= -octant && angle < octant) {
-        // Right
-        keys.push(cfg.right);
-      } else if (angle >= octant && angle < 3 * octant) {
-        // Down-Right
-        keys.push(cfg.down, cfg.right);
-      } else if (angle >= 3 * octant && angle < 5 * octant) {
-        // Down
-        keys.push(cfg.down);
-      } else if (angle >= 5 * octant && angle < 7 * octant) {
-        // Down-Left
-        keys.push(cfg.down, cfg.left);
-      } else if (angle >= 7 * octant || angle < -7 * octant) {
-        // Left
-        keys.push(cfg.left);
-      } else if (angle >= -7 * octant && angle < -5 * octant) {
-        // Up-Left
-        keys.push(cfg.up, cfg.left);
-      } else if (angle >= -5 * octant && angle < -3 * octant) {
-        // Up
-        keys.push(cfg.up);
-      } else if (angle >= -3 * octant && angle < -octant) {
-        // Up-Right
-        keys.push(cfg.up, cfg.right);
-      }
-
-      if (isSprintActive && cfg.sprint) {
-        keys.push(cfg.sprint);
-      }
-
-      return keys;
-    }
-
-    gpAnalogStick.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      if (stickTouchId !== null) return;
-
-      const t = e.changedTouches[0];
-      stickTouchId = t.identifier;
-      const rect = gpAnalogStick.getBoundingClientRect();
-      stickCenterX = rect.left + rect.width / 2;
-      stickCenterY = rect.top + rect.height / 2;
-
-      handleStickMove(t.clientX, t.clientY);
-    }, { passive: false });
-
-    window.addEventListener("touchmove", (e) => {
-      if (stickTouchId === null) return;
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const t = e.changedTouches[i];
-        if (t.identifier === stickTouchId) {
-          e.preventDefault();
-          handleStickMove(t.clientX, t.clientY);
-          break;
-        }
-      }
-    }, { passive: false });
-
-    function handleStickMove(clientX, clientY) {
-      let dx = clientX - stickCenterX;
-      let dy = clientY - stickCenterY;
-      const dist = Math.hypot(dx, dy);
-
-      if (dist > STICK_MAX_RADIUS) {
-        dx = (dx / dist) * STICK_MAX_RADIUS;
-        dy = (dy / dist) * STICK_MAX_RADIUS;
-      }
-
-      // Visual knob displacement
-      gpStickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
-
-      // Normalized coordinates (-1 to 1)
-      const normX = dx / STICK_MAX_RADIUS;
-      const normY = dy / STICK_MAX_RADIUS;
-      const normDist = dist / STICK_MAX_RADIUS;
-
-      // Sprint activation threshold (85% radius)
-      const sprintNow = normDist > 0.82;
-      if (sprintNow && !isSprinting && activePreset.stick.sprint) {
-        isSprinting = true;
-        gpStickKnob.classList.add("sprinting");
-        triggerHaptic("gpSprint");
-      } else if (!sprintNow && isSprinting) {
-        isSprinting = false;
-        gpStickKnob.classList.remove("sprinting");
-      }
-
-      const currentKeys = getStickKeys(normX, normY, isSprinting);
-      const keysString = currentKeys.sort().join(",");
-
-      if (keysString !== lastStickKeysString) {
-        lastStickKeysString = keysString;
-        socket.emit("gamepad_stick_sync", { keys: currentKeys });
-
-        // Update HUD
-        activeHudKeys.clear();
-        currentKeys.forEach(k => activeHudKeys.add(k));
-        updateHudKeys();
-      }
-    }
-
-    function resetStick() {
-      stickTouchId = null;
-      isSprinting = false;
-      gpStickKnob.classList.remove("sprinting");
-      gpStickKnob.style.transform = "translate(0px, 0px)";
-
-      if (lastStickKeysString !== "") {
-        lastStickKeysString = "";
-        socket.emit("gamepad_stick_sync", { keys: [] });
-        activeHudKeys.clear();
-        updateHudKeys();
-      }
-    }
-
-    window.addEventListener("touchend", (e) => {
-      if (stickTouchId === null) return;
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === stickTouchId) {
-          resetStick();
-          break;
-        }
-      }
-    });
-
-    window.addEventListener("touchcancel", (e) => {
-      if (stickTouchId === null) return;
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === stickTouchId) {
-          resetStick();
-          break;
-        }
-      }
-    });
-
-    // ==================== Steam Deck Aiming Look Pad ====================
-    const steamLookPad = document.getElementById("steamLookPad");
-    let lookTouchId = null;
-    let lookLastX = 0;
-    let lookLastY = 0;
-    let lookHapticAccumulator = 0;
-
-    steamLookPad.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      if (lookTouchId !== null) return;
-
-      const t = e.changedTouches[0];
-      lookTouchId = t.identifier;
-      lookLastX = t.clientX;
-      lookLastY = t.clientY;
-      lookHapticAccumulator = 0;
-    }, { passive: false });
-
-    window.addEventListener("touchmove", (e) => {
-      if (lookTouchId === null) return;
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const t = e.changedTouches[i];
-        if (t.identifier === lookTouchId) {
-          e.preventDefault();
-          const dx = (t.clientX - lookLastX) * 1.8;
-          const dy = (t.clientY - lookLastY) * 1.8;
-          lookLastX = t.clientX;
-          lookLastY = t.clientY;
-
-          queuePointerMove(dx, dy);
-
-          // Physical trackball micro-haptic tick
-          lookHapticAccumulator += Math.hypot(dx, dy);
-          if (lookHapticAccumulator > 22) {
-            lookHapticAccumulator = 0;
-            triggerHaptic("gpCameraTick");
+      window.addEventListener("touchmove", (e) => {
+        if (stickTouchId === null) return;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const t = e.changedTouches[i];
+          if (t.identifier === stickTouchId) {
+            e.preventDefault();
+            handleMove(t.clientX, t.clientY);
+            break;
           }
-          break;
+        }
+      }, { passive: false });
+
+      function handleMove(clientX, clientY) {
+        let dx = clientX - centerX;
+        let dy = clientY - centerY;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > maxRadius) {
+          dx = (dx / dist) * maxRadius;
+          dy = (dy / dist) * maxRadius;
+        }
+
+        knobEl.style.transform = `translate(${dx}px, ${dy}px)`;
+
+        const normX = dx / maxRadius;
+        const normY = dy / maxRadius;
+        const normDist = dist / maxRadius;
+
+        if (isRightStick) {
+          // Right stick controls camera/mouse look smoothly
+          if (normDist > 0.15) {
+            queuePointerMove(normX * 9 * userSpeedMultiplier, normY * 9 * userSpeedMultiplier);
+          }
+        } else {
+          // Left stick controls 8-directional movement (WASD)
+          const keys = [];
+          if (normDist > 0.2) {
+            const angle = Math.atan2(normY, normX);
+            const oct = Math.PI / 8;
+            if (angle >= -oct && angle < oct) keys.push("d");
+            else if (angle >= oct && angle < 3 * oct) keys.push("s", "d");
+            else if (angle >= 3 * oct && angle < 5 * oct) keys.push("s");
+            else if (angle >= 5 * oct && angle < 7 * oct) keys.push("s", "a");
+            else if (angle >= 7 * oct || angle < -7 * oct) keys.push("a");
+            else if (angle >= -7 * oct && angle < -5 * oct) keys.push("w", "a");
+            else if (angle >= -5 * oct && angle < -3 * oct) keys.push("w");
+            else if (angle >= -3 * oct && angle < -oct) keys.push("w", "d");
+
+            // Sprint when pushed to max outer ring
+            if (normDist > 0.85) {
+              keys.push("shift");
+            }
+          }
+
+          const kStr = keys.sort().join(",");
+          if (kStr !== lastKeysStr) {
+            lastKeysStr = kStr;
+            socket.emit("gamepad_stick_sync", { keys: keys });
+          }
         }
       }
-    }, { passive: false });
 
-    function resetLookPad() {
-      lookTouchId = null;
-      lookHapticAccumulator = 0;
+      function releaseStick() {
+        stickTouchId = null;
+        knobEl.style.transform = "translate(0px, 0px)";
+        if (!isRightStick && lastKeysStr !== "") {
+          lastKeysStr = "";
+          socket.emit("gamepad_stick_sync", { keys: [] });
+        }
+      }
+
+      window.addEventListener("touchend", (e) => {
+        if (stickTouchId === null) return;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === stickTouchId) {
+            releaseStick();
+            break;
+          }
+        }
+      });
+
+      window.addEventListener("touchcancel", (e) => {
+        if (stickTouchId === null) return;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === stickTouchId) {
+            releaseStick();
+            break;
+          }
+        }
+      });
     }
 
-    window.addEventListener("touchend", (e) => {
-      if (lookTouchId === null) return;
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === lookTouchId) {
-          resetLookPad();
-          break;
-        }
-      }
-    });
+    // Attach dual-sticks for Layout 1
+    setupConcentricThumbstick(document.getElementById("l1StickLeft"), document.getElementById("l1KnobLeft"), false);
+    setupConcentricThumbstick(document.getElementById("l1StickRight"), document.getElementById("l1KnobRight"), true);
 
-    window.addEventListener("touchcancel", (e) => {
-      if (lookTouchId === null) return;
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === lookTouchId) {
-          resetLookPad();
-          break;
-        }
-      }
-    });
+    // Attach dual-sticks for Layout 2
+    setupConcentricThumbstick(document.getElementById("l2StickLeft"), document.getElementById("l2KnobLeft"), false);
+    setupConcentricThumbstick(document.getElementById("l2StickRight"), document.getElementById("l2KnobRight"), true);
 
     // ==================== Keyboard Inputs ====================
     const kbText = document.getElementById("kbText");
