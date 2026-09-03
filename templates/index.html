@@ -3,34 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <title>Remote Trackpad Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-  <!-- Socket.IO client from CDN -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <!-- Socket.IO client hosted locally for fast LAN / offline loading -->
+  <script src="/static/socket.io.min.js"></script>
 
   <style>
     :root {
-      --bg: #0d0d0f;
-      --card: #18181c;
+      --bg: #0b0c10;
+      --card: #15161e;
       --accent: #4f8cff;
-      --accent-soft: rgba(79, 140, 255, 0.2);
-      --border: #2b2b33;
+      --accent-glow: rgba(79, 140, 255, 0.35);
+      --accent-soft: rgba(79, 140, 255, 0.16);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(255, 255, 255, 0.15);
       --text-main: #f5f5f7;
-      --text-muted: #8a8a96;
+      --text-muted: #8b8d9c;
+      --trackpad-surface: linear-gradient(170deg, #1f202b 0%, #13141b 55%, #0d0e13 100%);
     }
 
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      height: 100%;
+      height: -webkit-fill-available;
     }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #18181f 0, #050509 60%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e1f2b 0%, #08080c 70%);
       color: var(--text-main);
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh;
+      min-height: -webkit-fill-available;
+      overflow: hidden;
+      touch-action: none;
     }
 
     .app {
@@ -39,273 +52,353 @@
       height: 100%;
     }
 
+    /* Header */
     .header {
-      padding: 10px 16px 6px;
+      padding: 10px 16px 8px;
       text-align: center;
-      font-size: 18px;
-      background: linear-gradient(to bottom, #15151b, #101015);
+      background: linear-gradient(to bottom, #161720, #101117);
       border-bottom: 1px solid var(--border);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      z-index: 10;
     }
 
     .app-title {
       font-weight: 600;
-      letter-spacing: 0.03em;
+      font-size: 16px;
+      letter-spacing: 0.02em;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 7px;
     }
 
-    .app-title span.logo-dot {
+    .logo-dot {
       width: 8px;
       height: 8px;
       border-radius: 999px;
       background: var(--accent);
-      box-shadow: 0 0 10px rgba(79,140,255,0.9);
+      box-shadow: 0 0 10px var(--accent-glow);
     }
 
     #status {
       font-size: 11px;
       margin-top: 2px;
       color: var(--text-muted);
+      transition: color 0.2s;
     }
 
+    /* Tabs */
     .tabs {
       display: flex;
-      padding: 6px 10px 8px;
-      gap: 6px;
-      background: #101014;
+      padding: 6px 12px;
+      gap: 8px;
+      background: #0f1015;
       border-bottom: 1px solid var(--border);
+      z-index: 10;
     }
 
     .tab-btn {
       flex: 1;
       padding: 8px 6px;
-      border-radius: 999px;
+      border-radius: 10px;
       border: 1px solid transparent;
       background: transparent;
       color: var(--text-muted);
       font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
 
     .tab-btn.active {
       background: var(--accent-soft);
-      border-color: var(--accent);
+      border-color: rgba(79, 140, 255, 0.4);
       color: var(--text-main);
+      box-shadow: 0 2px 8px rgba(79, 140, 255, 0.15);
     }
 
+    /* Main Container */
     .content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 10px;
-      gap: 10px;
-    }
-
-    .card {
-      background: rgba(12, 12, 16, 0.96);
-      border-radius: 18px;
-      border: 1px solid rgba(70, 70, 90, 0.7);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.7);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      padding: 8px 10px;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      gap: 6px;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .view {
       display: none;
       height: 100%;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .view.active {
       display: flex;
     }
 
-    /* Touchpad */
-
-    #pad {
-      flex: 1;
-      border-radius: 16px;
-      border: 1px solid #333544;
-      background: radial-gradient(circle at top, #272738 0, #080811 75%);
-      touch-action: none;
-      position: relative;
-    }
-
-    .touchpad-footer {
+    /* ==================== MacBook Trackpad ==================== */
+    
+    .trackpad-toolbar {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 14px;
+      background: rgba(22, 23, 31, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
-    .buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    button {
-      font-family: inherit;
-    }
-
-    .btn-pill {
-      flex: 1;
-      padding: 11px;
-      border-radius: 999px;
-      border: none;
-      font-size: 14px;
-      background: #20202a;
-      color: #f1f1f5;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
-    }
-
-    .btn-pill:active {
-      transform: scale(0.97);
-      background: #2b2b37;
-    }
-
-    .speed-row {
+    .toolbar-left {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .speed-row span.label {
-      width: 42px;
-    }
-
-    .speed-row input[type="range"] {
       flex: 1;
+    }
+
+    .toolbar-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .speed-slider {
+      flex: 1;
+      max-width: 140px;
+      height: 4px;
+      accent-color: var(--accent);
+      cursor: pointer;
     }
 
     .speed-value {
-      width: 38px;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      color: var(--text-main);
       font-size: 11px;
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 30px;
+      font-variant-numeric: tabular-nums;
     }
 
-    .hint {
+    .haptic-indicator {
       font-size: 10px;
-      opacity: 0.7;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(79, 140, 255, 0.12);
+      border: 1px solid rgba(79, 140, 255, 0.28);
+      color: #92baff;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
     }
 
-    #scrollArea {
-      width: 80px;
-      border-radius: 16px;
-      border: 1px dashed #3d3d4a;
-      background: #12121a;
+    .haptic-indicator.pulse {
+      animation: hapticPulse 0.3s ease-out;
+    }
+
+    @keyframes hapticPulse {
+      0% { transform: scale(1); background: rgba(79, 140, 255, 0.4); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); background: rgba(79, 140, 255, 0.12); }
+    }
+
+    /* Monolithic Trackpad Glass Surface */
+    .mac-trackpad-frame {
+      flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
+      position: relative;
+      background: var(--trackpad-surface);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 
+        inset 0 1px 1px var(--border-highlight),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.8),
+        0 14px 36px rgba(0, 0, 0, 0.65);
+      touch-action: none;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+    }
+
+    /* Satin glass texture sheen */
+    .mac-trackpad-frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.04) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    /* Upper Active Motion Zone */
+    .trackpad-motion-zone {
+      flex: 1;
+      position: relative;
+      display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .trackpad-center-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .trackpad-center-mark::after {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Drag Lock Pill */
+    .drag-pill {
+      position: absolute;
+      top: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
       font-size: 11px;
-      margin-left: 8px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: all 0.2s ease;
+      pointer-events: none;
     }
 
-    .bottom-row {
+    .drag-pill.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Integrated Bottom Click Bar */
+    .trackpad-click-strip {
+      height: 72px;
+      min-height: 72px;
+      flex-shrink: 0;
+      position: relative;
       display: flex;
-      align-items: stretch;
-      gap: 8px;
+      align-items: center;
+      padding: 0 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(180deg, rgba(26, 28, 38, 0.97) 0%, rgba(13, 14, 20, 0.99) 100%);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.55);
     }
 
-    /* Keyboard view */
+    /* Laser-etched Center Divider */
+    .click-divider {
+      position: absolute;
+      top: 14%;
+      bottom: 14%;
+      left: 50%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.22), transparent);
+      pointer-events: none;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
 
-    .kb-text-wrapper {
+    /* Integrated Click Buttons with High Contrast & Visual Depth */
+    .click-zone {
       flex: 1;
-    }
-
-    #kbText {
-      width: 100%;
-      height: 110px;
-      border-radius: 12px;
-      border: 1px solid #343446;
-      background: #14141c;
-      color: var(--text-main);
-      padding: 8px;
-      font-size: 14px;
-      resize: none;
-    }
-
-    #kbText::placeholder {
-      color: #5e5e6a;
-    }
-
-    .kb-actions {
+      height: 54px;
+      margin: 0 4px;
       display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 8px;
-    }
-
-    .btn-primary {
-      flex: 1;
-      padding: 10px;
-      border-radius: 999px;
-      border: none;
-      background: var(--accent);
-      color: white;
       font-size: 14px;
-      font-weight: 500;
-      box-shadow: 0 4px 14px rgba(79,140,255,0.7);
-    }
-
-    .btn-secondary {
-      padding: 10px;
-      border-radius: 999px;
-      border: 1px solid #333349;
-      background: #181822;
-      color: var(--text-main);
-      font-size: 13px;
-    }
-
-    .kb-keys {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .kb-key-btn {
-      flex: 1 0 calc(25% - 6px);
-      min-width: 60px;
-      padding: 8px;
-      border-radius: 999px;
-      border: none;
-      background: #20202b;
-      color: var(--text-main);
-      font-size: 12px;
-    }
-
-    /* Media view */
-
-    .media-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .media-btn {
-      padding: 10px 6px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      position: relative;
       border-radius: 14px;
-      border: none;
-      background: #20202b;
-      color: var(--text-main);
-      font-size: 12px;
-      text-align: center;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+      transition: all 0.1s ease;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .media-btn.primary {
-      background: var(--accent);
-      color: white;
+    .click-zone svg {
+      opacity: 0.95;
+      stroke: #60a5fa;
+      transition: all 0.1s ease;
     }
 
-    .media-btn:active {
+    /* Tactile Press (Force Touch style) */
+    .click-zone.active-press {
+      background: rgba(79, 140, 255, 0.25);
+      border-color: rgba(79, 140, 255, 0.75);
+      color: #ffffff;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.7), 0 0 16px rgba(79, 140, 255, 0.4);
       transform: scale(0.97);
-      filter: brightness(1.1);
+    }
+
+    .click-zone.active-press svg {
+      opacity: 1;
+      transform: scale(0.92);
+    }
+
+    /* Gesture Guide Bar */
+    .trackpad-guide-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 8px;
+      font-size: 10.5px;
+      font-weight: 500;
+      color: #9da0b5;
+      background: rgba(18, 19, 26, 0.85);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .guide-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .guide-sep {
+      margin: 0 6px;
+      opacity: 0.35;
+    }
+
+    /* ==================== Keyboard View ==================== */
+    .card {
+      background: rgba(18, 19, 26, 0.96);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .section-title {
@@ -321,13 +414,138 @@
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .kb-text-wrapper {
+      flex: 1;
+    }
+
+    #kbText {
+      width: 100%;
+      height: 100px;
+      border-radius: 12px;
+      border: 1px solid #2e2f3d;
+      background: #111218;
+      color: var(--text-main);
+      padding: 10px;
+      font-size: 14px;
+      resize: none;
+      font-family: inherit;
+    }
+
+    #kbText:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    #kbText::placeholder {
+      color: #555768;
+    }
+
+    .kb-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(79, 140, 255, 0.6);
+      cursor: pointer;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid #333446;
+      background: #191a24;
+      color: var(--text-main);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-secondary:active {
+      background: #232534;
+    }
+
+    .kb-keys {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .kb-key-btn {
+      flex: 1 0 calc(25% - 6px);
+      min-width: 60px;
+      padding: 9px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: #1c1d28;
+      color: var(--text-main);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .kb-key-btn:active {
+      background: #2b2c3d;
+      transform: scale(0.96);
+    }
+
+    /* ==================== Media View ==================== */
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .media-btn {
+      padding: 12px 6px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: #1c1d28;
+      color: var(--text-main);
+      font-size: 13px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .media-btn.primary {
+      background: var(--accent);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 14px rgba(79, 140, 255, 0.45);
+    }
+
+    .media-btn:active {
+      transform: scale(0.96);
+      filter: brightness(1.15);
+    }
+
+    .hint {
+      font-size: 10px;
+      opacity: 0.7;
     }
 
     @media (min-width: 700px) {
       .content {
-        max-width: 480px;
+        max-width: 500px;
         margin: 0 auto;
         width: 100%;
       }
@@ -336,6 +554,7 @@
 </head>
 <body>
   <div class="app">
+    <!-- Header -->
     <div class="header">
       <div class="app-title">
         <span class="logo-dot"></span>
@@ -344,44 +563,73 @@
       <div id="status">Connecting...</div>
     </div>
 
+    <!-- Tabs -->
     <div class="tabs">
-      <button class="tab-btn active" data-view="touchpad">Touchpad</button>
+      <button class="tab-btn active" data-view="touchpad">Trackpad</button>
       <button class="tab-btn" data-view="keyboard">Keyboard</button>
       <button class="tab-btn" data-view="media">Media</button>
     </div>
 
+    <!-- Views -->
     <div class="content">
-      <!-- Touchpad View -->
+      <!-- MacBook Trackpad View -->
       <div id="view-touchpad" class="view active">
-        <div class="card" style="flex:1; min-height: 0;">
-          <div class="section-title">
-            <span>Trackpad</span>
-            <span class="badge">Gestures</span>
-          </div>
-          <div id="pad"></div>
-        </div>
-
-        <div class="card touchpad-footer">
-          <div class="buttons">
-            <button class="btn-pill" id="leftBtn">Left Click</button>
-            <button class="btn-pill" id="rightBtn">Right Click</button>
-          </div>
-
-          <div class="speed-row">
-            <span class="label">Speed</span>
-            <input id="speedSlider" type="range" min="0.3" max="3" step="0.1" value="1.5">
+        <!-- Toolbar -->
+        <div class="trackpad-toolbar">
+          <div class="toolbar-left">
+            <span class="toolbar-label">Speed</span>
+            <input id="speedSlider" class="speed-slider" type="range" min="0.5" max="3.5" step="0.1" value="1.5" />
             <span id="speedLabel" class="speed-value">1.5×</span>
           </div>
+          <div id="hapticBadge" class="haptic-indicator">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            Haptics
+          </div>
+        </div>
 
-          <div class="bottom-row">
-            <div style="flex: 1" class="hint">
-              Drag to move cursor. Tap = click, double-tap = double click, long-press = right click.
+        <!-- Monolithic Glass Trackpad Surface -->
+        <div class="mac-trackpad-frame" id="macTrackpad">
+          <!-- Active Motion Area (1-finger / 2-finger) -->
+          <div class="trackpad-motion-zone" id="motionZone">
+            <div class="trackpad-center-mark"></div>
+            <div id="dragPill" class="drag-pill">DRAGGING</div>
+          </div>
+
+          <!-- Integrated Bottom Click Bar -->
+          <div class="trackpad-click-strip">
+            <div class="click-divider"></div>
+            
+            <!-- Left Click Zone -->
+            <div class="click-zone" id="leftClickZone">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="6" y="3" width="12" height="18" rx="6"></rect>
+                <path d="M6 9h6"></path>
+                <path d="M12 3v6"></path>
+              </svg>
+              <span>Left Click</span>
             </div>
-            <div id="scrollArea">
-              Scroll<br />
-              <span style="opacity:0.7; font-size:10px;">Swipe up/down</span>
+
+            <!-- Right Click Zone -->
+            <div class="click-zone" id="rightClickZone">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="6" y="3" width="12" height="18" rx="6"></rect>
+                <path d="M12 9h6"></path>
+                <path d="M12 3v6"></path>
+              </svg>
+              <span>Right Click</span>
             </div>
           </div>
+        </div>
+
+        <!-- Gesture Guide Footer -->
+        <div class="trackpad-guide-bar">
+          <span class="guide-item">1-Finger: Move / Tap</span>
+          <span class="guide-sep">•</span>
+          <span class="guide-item">2-Finger: Scroll / Right-Click</span>
+          <span class="guide-sep">•</span>
+          <span class="guide-item">Bottom: Click Zones</span>
         </div>
       </div>
 
@@ -445,7 +693,7 @@
             <button class="media-btn" data-key="media_volume_up">🔊 Vol +</button>
           </div>
           <div class="hint" style="margin-top:6px;">
-            Media keys behavior can vary a bit depending on OS and active app.
+            Media keys behavior can vary depending on OS and active desktop application.
           </div>
         </div>
       </div>
@@ -453,19 +701,33 @@
   </div>
 
   <script>
-    const socket = io();
+    // ==================== Socket Connection ====================
+    const socket = io({
+      transports: ["websocket", "polling"],
+      reconnectionAttempts: 10,
+      timeout: 5000,
+    });
     const statusEl = document.getElementById("status");
+    const hapticBadge = document.getElementById("hapticBadge");
+    const dragPill = document.getElementById("dragPill");
 
-    // ----- Connection status -----
     socket.on("connect", () => {
       statusEl.textContent = "Connected ✔";
+      statusEl.style.color = "#4ade80";
     });
 
     socket.on("disconnect", () => {
       statusEl.textContent = "Disconnected ✖";
+      statusEl.style.color = "";
     });
 
-    // ----- Tabs -----
+    socket.on("connect_error", (err) => {
+      console.error("Socket error:", err);
+      statusEl.textContent = "Reconnecting...";
+      statusEl.style.color = "#f87171";
+    });
+
+    // ==================== Tabs Switcher ====================
     const tabButtons = document.querySelectorAll(".tab-btn");
     const views = {
       touchpad: document.getElementById("view-touchpad"),
@@ -476,217 +738,418 @@
     tabButtons.forEach(btn => {
       btn.addEventListener("click", () => {
         const viewName = btn.dataset.view;
-        // toggle active tab
         tabButtons.forEach(b => b.classList.toggle("active", b === btn));
-        // toggle views
         Object.entries(views).forEach(([name, el]) => {
           el.classList.toggle("active", name === viewName);
         });
       });
     });
 
-    // ----- Touchpad: pointer movement + gestures -----
-    const pad = document.getElementById("pad");
-    const leftBtn = document.getElementById("leftBtn");
-    const rightBtn = document.getElementById("rightBtn");
-    const scrollArea = document.getElementById("scrollArea");
+    // ==================== Haptic Feedback Engine ====================
+    function triggerHaptic(type = "click") {
+      // Visual feedback pulse on the haptic indicator
+      if (hapticBadge) {
+        hapticBadge.classList.remove("pulse");
+        void hapticBadge.offsetWidth;
+        hapticBadge.classList.add("pulse");
+      }
 
+      if (!("vibrate" in navigator)) return;
+
+      try {
+        switch (type) {
+          case "click": // Crisp single click (Left Click / Tap)
+            navigator.vibrate(14);
+            break;
+          case "rightClick": // Distinct double pulse (Right Click / 2-finger tap)
+            navigator.vibrate([18, 30, 22]);
+            break;
+          case "tap": // Ultra-light micro-tick
+            navigator.vibrate(10);
+            break;
+          case "dragStart": // Solid lock feedback
+            navigator.vibrate(30);
+            break;
+          case "scroll": // Micro tick
+            navigator.vibrate(6);
+            break;
+        }
+      } catch (e) {
+        // Safe catch for restricted browser policies
+      }
+    }
+
+    // ==================== Speed & Sensitivity ====================
     const speedSlider = document.getElementById("speedSlider");
     const speedLabel = document.getElementById("speedLabel");
+    let userSpeedMultiplier = parseFloat(speedSlider.value);
 
-    let speedFactor = parseFloat(speedSlider.value);
     speedSlider.addEventListener("input", () => {
-      speedFactor = parseFloat(speedSlider.value);
-      speedLabel.textContent = speedFactor.toFixed(1) + "×";
+      userSpeedMultiplier = parseFloat(speedSlider.value);
+      speedLabel.textContent = userSpeedMultiplier.toFixed(1) + "×";
     });
 
-    // movement state
-    let lastX = null;
-    let lastY = null;
+    // ==================== MacBook Pointer Physics ====================
+    // Non-linear acceleration (ballistics)
+    function calculateAcceleratedDelta(rawDx, rawDy, dtMs) {
+      const dist = Math.hypot(rawDx, rawDy);
+      if (dist === 0 || dtMs <= 0) return { dx: 0, dy: 0 };
 
-    function startPointer(x, y) {
-      lastX = x;
-      lastY = y;
-    }
+      // Instantaneous velocity (pixels / millisecond)
+      const velocity = dist / Math.max(dtMs, 4);
 
-    function movePointer(x, y) {
-      if (lastX === null || lastY === null) {
-        lastX = x;
-        lastY = y;
-        return;
+      // Smooth acceleration curve:
+      // Low velocity (< 0.25): precision mode (down to 0.85x for pixel accuracy)
+      // Medium velocity (0.25 - 1.2): standard tracking (1.1x to 2.3x)
+      // High velocity (> 1.2): exponential flick boost (up to 4.2x)
+      let curveFactor;
+      if (velocity < 0.25) {
+        curveFactor = 0.85 + (velocity / 0.25) * 0.25;
+      } else if (velocity < 1.2) {
+        curveFactor = 1.1 + Math.pow((velocity - 0.25) / 0.95, 1.35) * 1.2;
+      } else {
+        curveFactor = 2.3 + Math.min((velocity - 1.2) * 1.5, 2.0);
       }
-      let dx = x - lastX;
-      let dy = y - lastY;
-      lastX = x;
-      lastY = y;
 
-      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
-
-      dx *= speedFactor;
-      dy *= speedFactor;
-
-      socket.emit("move", { dx, dy });
+      const finalFactor = curveFactor * userSpeedMultiplier;
+      return {
+        dx: rawDx * finalFactor,
+        dy: rawDy * finalFactor,
+      };
     }
 
-    function endPointer() {
-      lastX = null;
-      lastY = null;
+    // ==================== rAF Batching (Jitter-free Motion) ====================
+    let accumulatedDx = 0;
+    let accumulatedDy = 0;
+    let rafScheduled = false;
+
+    function queuePointerMove(dx, dy) {
+      accumulatedDx += dx;
+      accumulatedDy += dy;
+
+      if (!rafScheduled) {
+        rafScheduled = true;
+        requestAnimationFrame(flushPointerMoves);
+      }
     }
 
-    // Gesture detection
+    function flushPointerMoves() {
+      rafScheduled = false;
+      if (Math.abs(accumulatedDx) > 0.05 || Math.abs(accumulatedDy) > 0.05) {
+        socket.emit("move", { dx: accumulatedDx, dy: accumulatedDy });
+        accumulatedDx = 0;
+        accumulatedDy = 0;
+      }
+    }
+
+    // ==================== Natural Two-Finger Scroll & Inertia ====================
+    let momentumVy = 0;
+    let momentumVx = 0;
+    let momentumRafId = null;
+
+    function stopMomentumScroll() {
+      if (momentumRafId) {
+        cancelAnimationFrame(momentumRafId);
+        momentumRafId = null;
+      }
+    }
+
+    function startMomentumScroll(vx, vy) {
+      stopMomentumScroll();
+      momentumVx = vx;
+      momentumVy = vy;
+
+      function stepMomentum() {
+        if (Math.abs(momentumVy) < 0.04 && Math.abs(momentumVx) < 0.04) {
+          momentumRafId = null;
+          return;
+        }
+
+        // Apply friction decay (0.92 per frame, just like macOS / iOS)
+        momentumVy *= 0.92;
+        momentumVx *= 0.92;
+
+        socket.emit("scroll", {
+          dx: -momentumVx * 0.4,
+          dy: -momentumVy * 0.4,
+        });
+
+        momentumRafId = requestAnimationFrame(stepMomentum);
+      }
+
+      momentumRafId = requestAnimationFrame(stepMomentum);
+    }
+
+    // ==================== Trackpad Touch Interaction ====================
+    const macTrackpad = document.getElementById("macTrackpad");
+    const motionZone = document.getElementById("motionZone");
+    const leftClickZone = document.getElementById("leftClickZone");
+    const rightClickZone = document.getElementById("rightClickZone");
+
+    // Gesture tracking state
     let touchStartTime = 0;
     let touchStartX = 0;
     let touchStartY = 0;
+    let lastX = 0;
+    let lastY = 0;
+    let lastTime = 0;
     let lastTapTime = 0;
     let longPressTimer = null;
-    let longPressTriggered = false;
+    let longPressFired = false;
+    let isDragging = false;
+    let dragLockTimer = null;
 
-    const TAP_MAX_TIME = 260;
-    const DOUBLE_TAP_GAP = 350;
-    const TAP_MAX_MOVE = 22;
-    const LONG_PRESS_TIME = 550;
+    // Two-finger state
+    let twoFingerStartDist = 0;
+    let twoFingerMidX = 0;
+    let twoFingerMidY = 0;
+    let twoFingerStartTime = 0;
+    let twoFingerMoved = false;
+    let lastScrollTime = 0;
+    let scrollVelX = 0;
+    let scrollVelY = 0;
 
-    function distance(aX, aY, bX, bY) {
-      const dx = aX - bX;
-      const dy = aY - bY;
-      return Math.sqrt(dx * dx + dy * dy);
+    function getTouchDist(t1, t2) {
+      return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
     }
 
-    function handleTapGesture(endX, endY) {
-      const now = Date.now();
-      const dt = now - touchStartTime;
-      const moved = distance(touchStartX, touchStartY, endX, endY);
-
-      if (dt > TAP_MAX_TIME || moved > TAP_MAX_MOVE) {
-        return;
-      }
-
-      if (now - lastTapTime < DOUBLE_TAP_GAP) {
-        // double-tap -> double left click
-        socket.emit("click", { button: "left" });
-        socket.emit("click", { button: "left" });
-        lastTapTime = 0;
-      } else {
-        // single tap
-        socket.emit("click", { button: "left" });
-        lastTapTime = now;
-      }
+    function getTouchMidpoint(t1, t2) {
+      return {
+        x: (t1.clientX + t2.clientX) / 2,
+        y: (t1.clientY + t2.clientY) / 2,
+      };
     }
 
-    function scheduleLongPress() {
-      clearLongPress();
-      longPressTriggered = false;
-      longPressTimer = setTimeout(() => {
-        longPressTriggered = true;
-        socket.emit("click", { button: "right" });
-      }, LONG_PRESS_TIME);
-    }
+    // Touch Start
+    motionZone.addEventListener("touchstart", (e) => {
+      stopMomentumScroll();
 
-    function clearLongPress() {
-      if (longPressTimer) {
+      const numTouches = e.touches.length;
+
+      if (numTouches === 1) {
+        const t = e.touches[0];
+        const now = performance.now();
+        touchStartTime = now;
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        lastX = t.clientX;
+        lastY = t.clientY;
+        lastTime = now;
+        longPressFired = false;
+
+        // Check for Tap-and-hold (Drag Lock)
+        const timeSinceLastTap = now - lastTapTime;
+        if (timeSinceLastTap < 320 && !isDragging) {
+          dragLockTimer = setTimeout(() => {
+            isDragging = true;
+            dragPill.classList.add("active");
+            triggerHaptic("dragStart");
+            socket.emit("mouse_down", { button: "left" });
+          }, 140);
+        }
+
+        // Schedule Long Press (Right click)
         clearTimeout(longPressTimer);
-        longPressTimer = null;
+        longPressTimer = setTimeout(() => {
+          if (!isDragging) {
+            longPressFired = true;
+            triggerHaptic("rightClick");
+            socket.emit("click", { button: "right" });
+          }
+        }, 520);
+
+      } else if (numTouches === 2) {
+        // Cancel single touch long press & drag timer
+        clearTimeout(longPressTimer);
+        clearTimeout(dragLockTimer);
+
+        twoFingerStartTime = performance.now();
+        twoFingerMoved = false;
+        twoFingerStartDist = getTouchDist(e.touches[0], e.touches[1]);
+        const mid = getTouchMidpoint(e.touches[0], e.touches[1]);
+        twoFingerMidX = mid.x;
+        twoFingerMidY = mid.y;
+        lastScrollTime = twoFingerStartTime;
+        scrollVelX = 0;
+        scrollVelY = 0;
       }
-    }
-
-    // touch events on pad
-    pad.addEventListener("touchstart", (e) => {
-      if (e.touches.length !== 1) return; // keep simple: 1-finger for move
-      const t = e.touches[0];
-      const x = t.clientX;
-      const y = t.clientY;
-
-      touchStartTime = Date.now();
-      touchStartX = x;
-      touchStartY = y;
-      longPressTriggered = false;
-      scheduleLongPress();
-
-      startPointer(x, y);
-    }, { passive: true });
-
-    pad.addEventListener("touchmove", (e) => {
-      if (e.touches.length !== 1) return;
-      e.preventDefault();
-      const t = e.touches[0];
-      const x = t.clientX;
-      const y = t.clientY;
-
-      if (distance(touchStartX, touchStartY, x, y) > TAP_MAX_MOVE) {
-        clearLongPress();
-      }
-
-      movePointer(x, y);
     }, { passive: false });
 
-    pad.addEventListener("touchend", () => {
-      clearLongPress();
-      endPointer();
+    // Touch Move
+    motionZone.addEventListener("touchmove", (e) => {
+      e.preventDefault(); // Prevent mobile viewport scrolling
+      const numTouches = e.touches.length;
 
-      if (!longPressTriggered) {
-        handleTapGesture(touchStartX, touchStartY);
+      if (numTouches === 1 && !twoFingerMoved) {
+        const t = e.touches[0];
+        const now = performance.now();
+        const dt = now - lastTime;
+        const dx = t.clientX - lastX;
+        const dy = t.clientY - lastY;
+        const totalMoved = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
+
+        if (totalMoved > 16) {
+          clearTimeout(longPressTimer);
+        }
+
+        lastX = t.clientX;
+        lastY = t.clientY;
+        lastTime = now;
+
+        if (Math.abs(dx) > 0.2 || Math.abs(dy) > 0.2) {
+          const accelerated = calculateAcceleratedDelta(dx, dy, dt);
+          queuePointerMove(accelerated.dx, accelerated.dy);
+        }
+
+      } else if (numTouches === 2) {
+        twoFingerMoved = true;
+        clearTimeout(longPressTimer);
+
+        const now = performance.now();
+        const mid = getTouchMidpoint(e.touches[0], e.touches[1]);
+        const dMidX = mid.x - twoFingerMidX;
+        const dMidY = mid.y - twoFingerMidY;
+        const dt = Math.max(now - lastScrollTime, 8);
+
+        twoFingerMidX = mid.x;
+        twoFingerMidY = mid.y;
+        lastScrollTime = now;
+
+        // Track velocity for momentum flick
+        scrollVelX = (dMidX / dt) * 16;
+        scrollVelY = (dMidY / dt) * 16;
+
+        // Emit smooth scroll
+        if (Math.abs(dMidX) > 0.5 || Math.abs(dMidY) > 0.5) {
+          socket.emit("scroll", {
+            dx: -dMidX * 0.7,
+            dy: -dMidY * 0.7,
+          });
+        }
       }
-    });
+    }, { passive: false });
 
-    // mouse support (for testing from laptop browser)
-    let isMouseDown = false;
+    // Touch End
+    motionZone.addEventListener("touchend", (e) => {
+      clearTimeout(longPressTimer);
+      clearTimeout(dragLockTimer);
 
-    pad.addEventListener("mousedown", (e) => {
-      isMouseDown = true;
-      startPointer(e.clientX, e.clientY);
-    });
+      const now = performance.now();
 
-    pad.addEventListener("mousemove", (e) => {
-      if (!isMouseDown) return;
-      movePointer(e.clientX, e.clientY);
-    });
+      // Release Dragging if active
+      if (isDragging) {
+        isDragging = false;
+        dragPill.classList.remove("active");
+        socket.emit("mouse_up", { button: "left" });
+        triggerHaptic("click");
+      }
 
-    pad.addEventListener("mouseup", () => {
-      isMouseDown = false;
-      endPointer();
-    });
+      // Check for Two-Finger Tap (Right Click)
+      if (twoFingerStartTime > 0 && !twoFingerMoved) {
+        const twoFingerDuration = now - twoFingerStartTime;
+        if (twoFingerDuration < 280) {
+          triggerHaptic("rightClick");
+          socket.emit("click", { button: "right" });
+          twoFingerStartTime = 0;
+          return;
+        }
+      }
 
-    pad.addEventListener("mouseleave", () => {
-      isMouseDown = false;
-      endPointer();
-    });
-
-    // click buttons
-    leftBtn.addEventListener("click", () => {
-      socket.emit("click", { button: "left" });
-    });
-
-    rightBtn.addEventListener("click", () => {
-      socket.emit("click", { button: "right" });
-    });
-
-    // scroll area (vertical scroll)
-    let lastScrollY = null;
-
-    scrollArea.addEventListener("touchstart", (e) => {
-      const t = e.touches[0];
-      lastScrollY = t.clientY;
-    }, { passive: true });
-
-    scrollArea.addEventListener("touchmove", (e) => {
-      e.preventDefault();
-      const t = e.touches[0];
-      if (lastScrollY === null) {
-        lastScrollY = t.clientY;
+      // Trigger Inertial Momentum Scroll if two-finger flick detected
+      if (twoFingerMoved) {
+        twoFingerMoved = false;
+        if (Math.hypot(scrollVelX, scrollVelY) > 1.2) {
+          startMomentumScroll(scrollVelX, scrollVelY);
+        }
+        twoFingerStartTime = 0;
         return;
       }
-      const dy = t.clientY - lastScrollY;
-      lastScrollY = t.clientY;
 
-      if (Math.abs(dy) < 1) return;
-      socket.emit("scroll", { dx: 0, dy: -dy / 5 });
-    }, { passive: false });
+      // Handle Single Finger Tap
+      const dt = now - touchStartTime;
+      const movedDist = Math.hypot(lastX - touchStartX, lastY - touchStartY);
 
-    scrollArea.addEventListener("touchend", () => {
-      lastScrollY = null;
+      if (dt < 260 && movedDist < 18 && !longPressFired) {
+        if (now - lastTapTime < 320) {
+          // Double Tap -> Double Click
+          triggerHaptic("click");
+          socket.emit("click", { button: "left", count: 2 });
+          lastTapTime = 0;
+        } else {
+          // Single Tap -> Left Click
+          triggerHaptic("tap");
+          socket.emit("click", { button: "left", count: 1 });
+          lastTapTime = now;
+        }
+      }
     });
 
-    // ----- Keyboard: text + special keys -----
+    // ==================== Integrated Click Zones ====================
+    function setupClickZone(el, buttonName) {
+      let isPressed = false;
+
+      function press(e) {
+        if (e.cancelable) e.preventDefault();
+        if (isPressed) return;
+        isPressed = true;
+        el.classList.add("active-press");
+
+        if (buttonName === "left") {
+          triggerHaptic("click");
+          socket.emit("mouse_down", { button: "left" });
+        } else {
+          triggerHaptic("rightClick");
+          socket.emit("click", { button: "right" });
+        }
+      }
+
+      function release(e) {
+        if (!isPressed) return;
+        isPressed = false;
+        el.classList.remove("active-press");
+
+        if (buttonName === "left") {
+          socket.emit("mouse_up", { button: "left" });
+        }
+      }
+
+      el.addEventListener("touchstart", press, { passive: false });
+      el.addEventListener("touchend", release);
+      el.addEventListener("touchcancel", release);
+
+      // Desktop preview support
+      el.addEventListener("mousedown", press);
+      window.addEventListener("mouseup", release);
+    }
+
+    setupClickZone(leftClickZone, "left");
+    setupClickZone(rightClickZone, "right");
+
+    // ==================== Desktop Mouse Fallback ====================
+    let isDesktopMouseDown = false;
+    let desktopLastX = 0;
+    let desktopLastY = 0;
+
+    motionZone.addEventListener("mousedown", (e) => {
+      isDesktopMouseDown = true;
+      desktopLastX = e.clientX;
+      desktopLastY = e.clientY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDesktopMouseDown) return;
+      const dx = (e.clientX - desktopLastX) * userSpeedMultiplier;
+      const dy = (e.clientY - desktopLastY) * userSpeedMultiplier;
+      desktopLastX = e.clientX;
+      desktopLastY = e.clientY;
+      queuePointerMove(dx, dy);
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDesktopMouseDown = false;
+    });
+
+    // ==================== Keyboard Inputs ====================
     const kbText = document.getElementById("kbText");
     const kbSend = document.getElementById("kbSend");
     const kbClear = document.getElementById("kbClear");
@@ -695,28 +1158,32 @@
     kbSend.addEventListener("click", () => {
       const text = kbText.value;
       if (text && socket.connected) {
+        triggerHaptic("tap");
         socket.emit("text", { text });
       }
     });
 
     kbClear.addEventListener("click", () => {
       kbText.value = "";
+      triggerHaptic("tap");
     });
 
     kbKeyButtons.forEach(btn => {
       btn.addEventListener("click", () => {
         const keyName = btn.dataset.key;
         if (!keyName) return;
+        triggerHaptic("tap");
         socket.emit("key", { name: keyName, action: "tap" });
       });
     });
 
-    // ----- Media controls -----
+    // ==================== Media Controls ====================
     const mediaButtons = document.querySelectorAll(".media-btn");
     mediaButtons.forEach(btn => {
       btn.addEventListener("click", () => {
         const keyName = btn.dataset.key;
         if (!keyName) return;
+        triggerHaptic("click");
         socket.emit("key", { name: keyName, action: "tap" });
       });
     });

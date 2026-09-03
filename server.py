@@ -3,9 +3,9 @@ from flask_socketio import SocketIO
 from pynput.mouse import Controller as MouseController, Button
 from pynput.keyboard import Controller as KeyboardController, Key
 
-# Explicitly tell Flask where templates are
-app = Flask(__name__, template_folder="templates")
-socketio = SocketIO(app, cors_allowed_origins="*")
+# Explicitly tell Flask where templates and static files are
+app = Flask(__name__, template_folder="templates", static_folder="static")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 mouse = MouseController()
 keyboard = KeyboardController()
@@ -45,13 +45,27 @@ def index():
 
 # ----------------- Mouse handlers ----------------- #
 
+# Subpixel precision accumulators
+subpixel_x = 0.0
+subpixel_y = 0.0
+subpixel_scroll_x = 0.0
+subpixel_scroll_y = 0.0
+
 @socketio.on("move")
 def handle_move(data):
+    global subpixel_x, subpixel_y
     try:
-        dx = float(data.get("dx", 0))
-        dy = float(data.get("dy", 0))
-        sensitivity = 1.0  # speed handled on client side
-        mouse.move(dx * sensitivity, dy * sensitivity)
+        dx = float(data.get("dx", 0)) + subpixel_x
+        dy = float(data.get("dy", 0)) + subpixel_y
+
+        int_dx = int(dx)
+        int_dy = int(dy)
+
+        subpixel_x = dx - int_dx
+        subpixel_y = dy - int_dy
+
+        if int_dx != 0 or int_dy != 0:
+            mouse.move(int_dx, int_dy)
     except Exception as e:
         print("Error in move:", e)
 
@@ -60,21 +74,48 @@ def handle_move(data):
 def handle_click(data):
     try:
         button_name = data.get("button", "left")
-        if button_name == "right":
-            btn = Button.right
-        else:
-            btn = Button.left
-        mouse.click(btn)
+        count = int(data.get("count", 1))
+        btn = Button.right if button_name == "right" else Button.left
+        mouse.click(btn, count)
     except Exception as e:
         print("Error in click:", e)
 
 
+@socketio.on("mouse_down")
+def handle_mouse_down(data):
+    try:
+        button_name = data.get("button", "left")
+        btn = Button.right if button_name == "right" else Button.left
+        mouse.press(btn)
+    except Exception as e:
+        print("Error in mouse_down:", e)
+
+
+@socketio.on("mouse_up")
+def handle_mouse_up(data):
+    try:
+        button_name = data.get("button", "left")
+        btn = Button.right if button_name == "right" else Button.left
+        mouse.release(btn)
+    except Exception as e:
+        print("Error in mouse_up:", e)
+
+
 @socketio.on("scroll")
 def handle_scroll(data):
+    global subpixel_scroll_x, subpixel_scroll_y
     try:
-        dx = float(data.get("dx", 0))
-        dy = float(data.get("dy", 0))
-        mouse.scroll(dx, dy)
+        dx = float(data.get("dx", 0)) + subpixel_scroll_x
+        dy = float(data.get("dy", 0)) + subpixel_scroll_y
+
+        int_dx = int(dx)
+        int_dy = int(dy)
+
+        subpixel_scroll_x = dx - int_dx
+        subpixel_scroll_y = dy - int_dy
+
+        if int_dx != 0 or int_dy != 0:
+            mouse.scroll(int_dx, int_dy)
     except Exception as e:
         print("Error in scroll:", e)
 
@@ -125,4 +166,4 @@ def handle_key(data):
 
 if __name__ == "__main__":
     # debug=True so we see errors clearly in the terminal
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, allow_unsafe_werkzeug=True)
