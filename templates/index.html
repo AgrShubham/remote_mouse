@@ -443,16 +443,69 @@
       height: 100dvh;
     }
 
-    /* Top Navigation (3 Dots: Layout 1, Layout 2, Connection Status) */
+    /* Top Navigation (3 Dots + Fullscreen Button) */
     .gp-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 12px 0 12px;
+      height: 38px;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .gp-top-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .gp-top-side.right {
+      justify-content: flex-end;
+    }
+
+    .gp-top-center {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 32px;
-      padding-top: 2px;
-      height: 32px;
+    }
+
+    .gp-fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #e5e5ea;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.15s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .gp-fullscreen-btn:active {
+      transform: scale(0.94);
+      background: rgba(79, 140, 255, 0.3);
+      border-color: #60a5fa;
+      color: #ffffff;
+    }
+
+    .gp-fullscreen-btn.is-fullscreen {
+      background: rgba(52, 211, 153, 0.15);
+      border-color: rgba(52, 211, 153, 0.4);
+      color: #34d399;
+    }
+
+    .gp-fullscreen-btn svg {
       flex-shrink: 0;
-      z-index: 20;
     }
 
     .gp-dot-toggle {
@@ -1189,17 +1242,33 @@
       <!-- ================================================================ -->
       <div id="view-gamepad" class="view">
         <div class="gamepad-fullscreen-canvas" id="gpCanvas">
-          <!-- Top Row: Layout 1 dot, Layout 2 dot, Connection Beacon -->
+          <!-- Top Row: Layout 1 dot, Layout 2 dot, Connection Beacon, Fullscreen Button -->
           <div class="gp-top-row">
-            <button class="gp-dot-toggle active" id="dotLayout1" title="Layout 1 (Asymmetric)"></button>
-            <button class="gp-dot-toggle" id="dotLayout2" title="Layout 2 (Symmetric)"></button>
-            <div class="gp-wifi-beacon" id="gpWifiBeacon" title="Connection status">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
-                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                <line x1="12" y1="20" x2="12.01" y2="20"></line>
-              </svg>
+            <div class="gp-top-side left"></div>
+
+            <div class="gp-top-center">
+              <button class="gp-dot-toggle active" id="dotLayout1" title="Layout 1 (Asymmetric)"></button>
+              <button class="gp-dot-toggle" id="dotLayout2" title="Layout 2 (Symmetric)"></button>
+              <div class="gp-wifi-beacon" id="gpWifiBeacon" title="Connection status">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                  <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                  <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                </svg>
+              </div>
+            </div>
+
+            <div class="gp-top-side right">
+              <button class="gp-fullscreen-btn" id="gpFullscreenBtn" title="Toggle Fullscreen">
+                <svg class="fs-icon-enter" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+                <svg class="fs-icon-exit" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                  <path d="M4 14h6v6m10-10h-6V4m0 6 7-7M3 21l7-7"></path>
+                </svg>
+                <span>Fullscreen</span>
+              </button>
             </div>
           </div>
 
@@ -1529,6 +1598,49 @@
     });
 
     // ==================== Haptic Feedback Engine ====================
+    let audioCtx = null;
+    function playHapticAudioClick(type) {
+      try {
+        if (!audioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) audioCtx = new AudioCtx();
+        }
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume().catch(() => {});
+        }
+        if (!audioCtx) return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (type === "gpTrigger") {
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(45, now + 0.04);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === "gpStick") {
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(100, now + 0.015);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
+          osc.start(now);
+          osc.stop(now + 0.015);
+        } else {
+          osc.frequency.setValueAtTime(type === "gpDpad" ? 540 : 700, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.02);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+          osc.start(now);
+          osc.stop(now + 0.02);
+        }
+      } catch (e) {}
+    }
+
     function triggerHaptic(type = "click") {
       if (hapticBadge) {
         hapticBadge.classList.remove("pulse");
@@ -1536,45 +1648,55 @@
         hapticBadge.classList.add("pulse");
       }
 
+      // Universal click sound synthesis for crisp tactile perception
+      playHapticAudioClick(type);
+
       if (!("vibrate" in navigator)) return;
 
       try {
         switch (type) {
           case "click":
-            navigator.vibrate(14);
-            break;
-          case "rightClick":
-            navigator.vibrate([18, 30, 22]);
-            break;
-          case "tap":
-            navigator.vibrate(10);
-            break;
-          case "dragStart":
             navigator.vibrate(30);
             break;
-          case "scroll":
-            navigator.vibrate(6);
+          case "rightClick":
+            navigator.vibrate([35, 40, 35]);
             break;
-          // Gamepad specific waveforms
+          case "tap":
+            navigator.vibrate(25);
+            break;
+          case "dragStart":
+            navigator.vibrate(45);
+            break;
+          case "scroll":
+            navigator.vibrate(15);
+            break;
+          // Gamepad specific waveforms (solid, perceptible vibration)
           case "gpTrigger": // Deep recoil
-            navigator.vibrate(32);
+            navigator.vibrate([45, 30, 45]);
             break;
           case "gpButton": // Crisp mechanical face button
-            navigator.vibrate(14);
+            navigator.vibrate(35);
             break;
           case "gpBumper": // Snappy bumper switch
-            navigator.vibrate(18);
+            navigator.vibrate(38);
             break;
-          case "gpDpad": // Micro directional petal tick
-            navigator.vibrate(12);
+          case "gpDpad": // Directional petal tick
+            navigator.vibrate(30);
             break;
           case "gpSwitch": // Layout switch pulse
-            navigator.vibrate([10, 20, 10]);
+            navigator.vibrate([25, 30, 25]);
+            break;
+          case "gpStick": // Stick touch & release
+            navigator.vibrate(22);
+            break;
+          case "gpSprint": // Outer sprint threshold
+            navigator.vibrate([35, 25, 45]);
+            break;
+          default:
+            navigator.vibrate(30);
             break;
         }
-      } catch (e) {
-        // Safe catch
-      }
+      } catch (e) {}
     }
 
     // ==================== Speed & Sensitivity ====================
@@ -2015,18 +2137,56 @@
     dotLayout1.addEventListener("click", () => setActiveLayout(1));
     dotLayout2.addEventListener("click", () => setActiveLayout(2));
 
-    // Fullscreen Toggle on Wifi Beacon / Top Double Click
-    const gpCanvas = document.getElementById("gpCanvas");
-    if (gpWifiBeacon) {
-      gpWifiBeacon.addEventListener("click", () => {
-        triggerHaptic("click");
-        if (!document.fullscreenElement) {
-          gpCanvas.requestFullscreen().catch(() => {});
-        } else {
-          document.exitFullscreen().catch(() => {});
-        }
-      });
+    // Fullscreen Button & Toggle Engine
+    const gpFullscreenBtn = document.getElementById("gpFullscreenBtn");
+    const fsIconEnter = gpFullscreenBtn ? gpFullscreenBtn.querySelector(".fs-icon-enter") : null;
+    const fsIconExit = gpFullscreenBtn ? gpFullscreenBtn.querySelector(".fs-icon-exit") : null;
+    const fsBtnText = gpFullscreenBtn ? gpFullscreenBtn.querySelector("span") : null;
+
+    function updateFullscreenUI() {
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (fsIconEnter && fsIconExit) {
+        fsIconEnter.style.display = isFs ? "none" : "block";
+        fsIconExit.style.display = isFs ? "block" : "none";
+      }
+      if (fsBtnText) {
+        fsBtnText.textContent = isFs ? "Exit Full" : "Fullscreen";
+      }
+      if (gpFullscreenBtn) {
+        gpFullscreenBtn.classList.toggle("is-fullscreen", isFs);
+      }
     }
+
+    function toggleFullscreen() {
+      triggerHaptic("click");
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const target = document.documentElement;
+        if (target.requestFullscreen) {
+          target.requestFullscreen().catch(() => {});
+        } else if (target.webkitRequestFullscreen) {
+          target.webkitRequestFullscreen();
+        }
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("landscape").catch(() => {});
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
+    if (gpFullscreenBtn) {
+      gpFullscreenBtn.addEventListener("click", toggleFullscreen);
+    }
+    if (gpWifiBeacon) {
+      gpWifiBeacon.addEventListener("click", toggleFullscreen);
+    }
+
+    document.addEventListener("fullscreenchange", updateFullscreenUI);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenUI);
 
     // Gyroscope Motion Steering / Aiming Toggle
     let gyroActive = false;
@@ -2182,6 +2342,7 @@
       let centerY = 0;
       let maxRadius = 38;
       let lastKeysStr = "";
+      let isSprinting = false;
 
       baseEl.addEventListener("touchstart", (e) => {
         e.preventDefault();
@@ -2193,7 +2354,9 @@
         centerX = rect.left + rect.width / 2;
         centerY = rect.top + rect.height / 2;
         maxRadius = rect.width * 0.32;
+        isSprinting = false;
 
+        triggerHaptic("gpStick");
         handleMove(t.clientX, t.clientY);
       }, { passive: false });
 
@@ -2225,6 +2388,14 @@
         const normY = dy / maxRadius;
         const normDist = dist / maxRadius;
 
+        // Tactile sprint sensation when pushed to outer edge
+        if (normDist > 0.82 && !isSprinting) {
+          isSprinting = true;
+          triggerHaptic("gpSprint");
+        } else if (normDist <= 0.82 && isSprinting) {
+          isSprinting = false;
+        }
+
         if (isRightStick) {
           // Right stick controls camera/mouse look smoothly
           if (normDist > 0.15) {
@@ -2246,7 +2417,7 @@
             else if (angle >= -3 * oct && angle < -oct) keys.push("w", "d");
 
             // Sprint when pushed to max outer ring
-            if (normDist > 0.85) {
+            if (normDist > 0.82) {
               keys.push("shift");
             }
           }
@@ -2261,7 +2432,9 @@
 
       function releaseStick() {
         stickTouchId = null;
+        isSprinting = false;
         knobEl.style.transform = "translate(0px, 0px)";
+        triggerHaptic("gpStick");
         if (!isRightStick && lastKeysStr !== "") {
           lastKeysStr = "";
           socket.emit("gamepad_stick_sync", { keys: [] });
