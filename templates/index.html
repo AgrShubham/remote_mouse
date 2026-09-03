@@ -1024,89 +1024,274 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .kb-text-wrapper {
-      flex: 1;
-    }
+    /* ================================================================ */
+    /* ==================== MECHANICAL KEYBOARD VIEW ================== */
+    /* ================================================================ */
 
-    #kbText {
+    #view-keyboard {
+      padding: 0;
+      margin: 0;
       width: 100%;
-      height: 100px;
-      border-radius: 12px;
-      border: 1px solid #2e2f3d;
-      background: #111218;
-      color: var(--text-main);
-      padding: 10px;
-      font-size: 14px;
-      resize: none;
-      font-family: inherit;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      position: relative;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+      background: #14151a;
     }
 
-    #kbText:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    #kbText::placeholder {
-      color: #555768;
-    }
-
-    .kb-actions {
+    #view-keyboard.active {
       display: flex;
-      gap: 8px;
     }
 
-    .btn-primary {
-      flex: 1;
-      padding: 10px;
-      border-radius: 999px;
-      border: none;
-      background: var(--accent);
-      color: white;
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 4px 14px rgba(79, 140, 255, 0.6);
-      cursor: pointer;
+    :fullscreen #view-keyboard,
+    :-webkit-full-screen #view-keyboard {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      width: 100vw;
+      height: 100dvh;
     }
 
-    .btn-primary:active {
-      transform: scale(0.98);
-    }
-
-    .btn-secondary {
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: 1px solid #333446;
-      background: #191a24;
-      color: var(--text-main);
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .btn-secondary:active {
-      background: #232534;
-    }
-
-    .kb-keys {
+    .mech-kb-toolbar {
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 14px;
+      background: rgba(22, 23, 30, 0.95);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .mech-kb-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mech-sound-toggle {
+      display: inline-flex;
+      align-items: center;
       gap: 6px;
-    }
-
-    .kb-key-btn {
-      flex: 1 0 calc(25% - 6px);
-      min-width: 60px;
-      padding: 9px 6px;
+      padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      background: #1c1d28;
-      color: var(--text-main);
-      font-size: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #d1d1d6;
+      font-size: 11px;
+      font-weight: 600;
       cursor: pointer;
     }
 
-    .kb-key-btn:active {
-      background: #2b2c3d;
-      transform: scale(0.96);
+    .mech-sound-toggle.active {
+      background: rgba(79, 140, 255, 0.2);
+      border-color: rgba(79, 140, 255, 0.5);
+      color: #93bbfd;
+    }
+
+    .mech-caps-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #8e8e93;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .mech-caps-indicator.active {
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.4);
+      background: rgba(52, 211, 153, 0.12);
+    }
+
+    .mech-caps-indicator::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #8e8e93;
+    }
+
+    .mech-caps-indicator.active::before {
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+    }
+
+    .mech-fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #e5e5ea;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .mech-fullscreen-btn:active {
+      transform: scale(0.94);
+      background: rgba(79, 140, 255, 0.3);
+      border-color: #60a5fa;
+      color: #ffffff;
+    }
+
+    .mech-fullscreen-btn.is-fullscreen {
+      background: rgba(52, 211, 153, 0.15);
+      border-color: rgba(52, 211, 153, 0.4);
+      color: #34d399;
+    }
+
+    /* Mechanical Keyboard Chassis */
+    .mech-kb-scroll-wrap {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .mech-kb-chassis {
+      display: flex;
+      gap: 12px;
+      background: linear-gradient(180deg, #e3e5ea 0%, #cbd0da 100%);
+      border: 3px solid #b2b6c2;
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 
+        0 14px 28px rgba(0, 0, 0, 0.6),
+        inset 0 1px 1px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+      max-width: 100%;
+      box-sizing: border-box;
+      touch-action: none;
+    }
+
+    .mech-main-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 600px;
+    }
+
+    .mech-nav-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 135px;
+      flex-shrink: 0;
+    }
+
+    .mech-row {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    /* Mechanical Keycap 3D Design */
+    .mech-key {
+      flex: 1;
+      height: clamp(34px, 5.8vmin, 44px);
+      min-width: 0;
+      background: linear-gradient(180deg, #ffffff 0%, #edf0f5 100%);
+      border: 1px solid #c2c6d2;
+      border-radius: 6px;
+      color: #1a1a1e;
+      font-weight: 700;
+      font-size: clamp(10px, 1.9vmin, 13px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none;
+      box-shadow: 
+        0 3px 0 #9ea2af,
+        0 4px 6px rgba(0, 0, 0, 0.18);
+      transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.05s ease;
+      touch-action: none;
+      padding: 0 3px;
+      text-align: center;
+    }
+
+    .mech-key span.sub-legend {
+      font-size: 8.5px;
+      opacity: 0.65;
+      line-height: 1;
+      margin-bottom: 1px;
+    }
+
+    .mech-key span.main-legend {
+      line-height: 1.1;
+    }
+
+    /* Tactile Depression Physics */
+    .mech-key.active-press, .mech-key:active {
+      transform: translateY(2.5px);
+      box-shadow: 
+        0 0.5px 0 #9ea2af,
+        inset 0 2px 4px rgba(0, 0, 0, 0.16);
+      background: #e2e5eb;
+      color: #000000;
+    }
+
+    .mech-key.latched {
+      background: #d8ecff;
+      border-color: #60a5fa;
+      color: #1d4ed8;
+      box-shadow: 
+        0 1px 0 #3b82f6,
+        inset 0 2px 4px rgba(59, 130, 246, 0.25);
+      transform: translateY(1.5px);
+    }
+
+    /* Functional Key Sizes */
+    .w-1-25 { flex: 1.25; }
+    .w-1-5  { flex: 1.5; }
+    .w-1-75 { flex: 1.75; }
+    .w-2    { flex: 2; }
+    .w-2-25 { flex: 2.25; }
+    .w-2-75 { flex: 2.75; }
+    .w-space { flex: 6.25; }
+
+    .mech-gap-f {
+      width: 10px;
+      flex-shrink: 0;
+    }
+
+    .mech-nav-spacer {
+      height: clamp(34px, 5.8vmin, 44px);
+      width: 100%;
+    }
+
+    /* Accent Keys */
+    .mech-key.k-esc {
+      color: #dc2626;
+    }
+    .mech-key.k-enter {
+      color: #2563eb;
     }
 
     /* ==================== Media View ==================== */
@@ -1454,45 +1639,178 @@
         </div>
       </div>
 
-      <!-- Keyboard View -->
+      <!-- ================================================================ -->
+      <!-- ==================== MECHANICAL KEYBOARD VIEW ================== -->
+      <!-- ================================================================ -->
       <div id="view-keyboard" class="view">
-        <div class="card">
-          <div class="section-title">
-            <span>Keyboard</span>
-            <span class="badge">Text input</span>
+        <!-- Mechanical Keyboard Top Toolbar -->
+        <div class="mech-kb-toolbar">
+          <div class="mech-kb-status">
+            <button class="mech-sound-toggle active" id="mechSoundToggle" title="Toggle Mechanical Switch Sound">
+              🔊 Click Sound: ON
+            </button>
+            <div class="mech-caps-indicator" id="mechCapsIndicator">CAPS</div>
           </div>
-          <div class="kb-text-wrapper">
-            <textarea id="kbText" placeholder="Type here and tap “Type on PC” to send text to the computer..."></textarea>
-          </div>
-          <div class="kb-actions">
-            <button id="kbSend" class="btn-primary">Type on PC</button>
-            <button id="kbClear" class="btn-secondary">Clear</button>
-          </div>
+
+          <button class="mech-fullscreen-btn" id="mechFullscreenBtn" title="Toggle Fullscreen">
+            <svg class="fs-icon-enter" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            <svg class="fs-icon-exit" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <path d="M4 14h6v6m10-10h-6V4m0 6 7-7M3 21l7-7"></path>
+            </svg>
+            <span>Fullscreen</span>
+          </button>
         </div>
 
-        <div class="card">
-          <div class="section-title">
-            <span>Special keys</span>
-            <span class="badge">Shortcuts</span>
-          </div>
-          <div class="kb-keys">
-            <button class="kb-key-btn" data-key="enter">Enter ↩</button>
-            <button class="kb-key-btn" data-key="backspace">Backspace ⌫</button>
-            <button class="kb-key-btn" data-key="tab">Tab ⇥</button>
-            <button class="kb-key-btn" data-key="esc">Esc</button>
+        <!-- Scrollable Keyboard Canvas -->
+        <div class="mech-kb-scroll-wrap" id="mechKbWrap">
+          <div class="mech-kb-chassis">
+            <!-- Left: Main Alpha-Numeric Deck -->
+            <div class="mech-main-deck">
+              <!-- Row 0: Function Keys -->
+              <div class="mech-row">
+                <div class="mech-key k-esc" data-key="esc">Esc</div>
+                <div class="mech-gap-f"></div>
+                <div class="mech-key" data-key="f1">F1</div>
+                <div class="mech-key" data-key="f2">F2</div>
+                <div class="mech-key" data-key="f3">F3</div>
+                <div class="mech-key" data-key="f4">F4</div>
+                <div class="mech-gap-f"></div>
+                <div class="mech-key" data-key="f5">F5</div>
+                <div class="mech-key" data-key="f6">F6</div>
+                <div class="mech-key" data-key="f7">F7</div>
+                <div class="mech-key" data-key="f8">F8</div>
+                <div class="mech-gap-f"></div>
+                <div class="mech-key" data-key="f9">F9</div>
+                <div class="mech-key" data-key="f10">F10</div>
+                <div class="mech-key" data-key="f11">F11</div>
+                <div class="mech-key" data-key="f12">F12</div>
+              </div>
 
-            <button class="kb-key-btn" data-key="up">↑</button>
-            <button class="kb-key-btn" data-key="down">↓</button>
-            <button class="kb-key-btn" data-key="left">←</button>
-            <button class="kb-key-btn" data-key="right">→</button>
+              <!-- Row 1: Numbers & Symbols -->
+              <div class="mech-row">
+                <div class="mech-key" data-char="`" data-shift="~"><span class="sub-legend">~</span><span class="main-legend">`</span></div>
+                <div class="mech-key" data-char="1" data-shift="!"><span class="sub-legend">!</span><span class="main-legend">1</span></div>
+                <div class="mech-key" data-char="2" data-shift="@"><span class="sub-legend">@</span><span class="main-legend">2</span></div>
+                <div class="mech-key" data-char="3" data-shift="#"><span class="sub-legend">#</span><span class="main-legend">3</span></div>
+                <div class="mech-key" data-char="4" data-shift="$"><span class="sub-legend">$</span><span class="main-legend">4</span></div>
+                <div class="mech-key" data-char="5" data-shift="%"><span class="sub-legend">%</span><span class="main-legend">5</span></div>
+                <div class="mech-key" data-char="6" data-shift="^"><span class="sub-legend">^</span><span class="main-legend">6</span></div>
+                <div class="mech-key" data-char="7" data-shift="&amp;"><span class="sub-legend">&amp;</span><span class="main-legend">7</span></div>
+                <div class="mech-key" data-char="8" data-shift="*"><span class="sub-legend">*</span><span class="main-legend">8</span></div>
+                <div class="mech-key" data-char="9" data-shift="("><span class="sub-legend">(</span><span class="main-legend">9</span></div>
+                <div class="mech-key" data-char="0" data-shift=")"><span class="sub-legend">)</span><span class="main-legend">0</span></div>
+                <div class="mech-key" data-char="-" data-shift="_"><span class="sub-legend">_</span><span class="main-legend">-</span></div>
+                <div class="mech-key" data-char="=" data-shift="+"><span class="sub-legend">+</span><span class="main-legend">=</span></div>
+                <div class="mech-key w-2" data-key="backspace">Backspace ⌫</div>
+              </div>
 
-            <button class="kb-key-btn" data-key="delete">Delete</button>
-            <button class="kb-key-btn" data-key="home">Home</button>
-            <button class="kb-key-btn" data-key="end">End</button>
-            <button class="kb-key-btn" data-key="page_up">PageUp</button>
-            <button class="kb-key-btn" data-key="page_down">PageDown</button>
+              <!-- Row 2: QWERTY -->
+              <div class="mech-row">
+                <div class="mech-key w-1-5" data-key="tab">Tab ⇥</div>
+                <div class="mech-key char-key" data-char="q" data-shift="Q">Q</div>
+                <div class="mech-key char-key" data-char="w" data-shift="W">W</div>
+                <div class="mech-key char-key" data-char="e" data-shift="E">E</div>
+                <div class="mech-key char-key" data-char="r" data-shift="R">R</div>
+                <div class="mech-key char-key" data-char="t" data-shift="T">T</div>
+                <div class="mech-key char-key" data-char="y" data-shift="Y">Y</div>
+                <div class="mech-key char-key" data-char="u" data-shift="U">U</div>
+                <div class="mech-key char-key" data-char="i" data-shift="I">I</div>
+                <div class="mech-key char-key" data-char="o" data-shift="O">O</div>
+                <div class="mech-key char-key" data-char="p" data-shift="P">P</div>
+                <div class="mech-key" data-char="[" data-shift="{"><span class="sub-legend">{</span><span class="main-legend">[</span></div>
+                <div class="mech-key" data-char="]" data-shift="}"><span class="sub-legend">}</span><span class="main-legend">]</span></div>
+                <div class="mech-key w-1-25" data-char="\" data-shift="|"><span class="sub-legend">|</span><span class="main-legend">\</span></div>
+              </div>
 
-            <button class="kb-key-btn" data-key="space">Space ␣</button>
+              <!-- Row 3: Home Row -->
+              <div class="mech-row">
+                <div class="mech-key w-1-75" data-key="caps_lock" id="keyCapsLock">Caps Lock</div>
+                <div class="mech-key char-key" data-char="a" data-shift="A">A</div>
+                <div class="mech-key char-key" data-char="s" data-shift="S">S</div>
+                <div class="mech-key char-key" data-char="d" data-shift="D">D</div>
+                <div class="mech-key char-key" data-char="f" data-shift="F">F</div>
+                <div class="mech-key char-key" data-char="g" data-shift="G">G</div>
+                <div class="mech-key char-key" data-char="h" data-shift="H">H</div>
+                <div class="mech-key char-key" data-char="j" data-shift="J">J</div>
+                <div class="mech-key char-key" data-char="k" data-shift="K">K</div>
+                <div class="mech-key char-key" data-char="l" data-shift="L">L</div>
+                <div class="mech-key" data-char=";" data-shift=":"><span class="sub-legend">:</span><span class="main-legend">;</span></div>
+                <div class="mech-key" data-char="'" data-shift="&quot;"><span class="sub-legend">"</span><span class="main-legend">'</span></div>
+                <div class="mech-key w-2-25 k-enter" data-key="enter">Enter ↵</div>
+              </div>
+
+              <!-- Row 4: Shift Row -->
+              <div class="mech-row">
+                <div class="mech-key w-2-25" data-modifier="shift" id="keyShiftL">⇧ Shift</div>
+                <div class="mech-key char-key" data-char="z" data-shift="Z">Z</div>
+                <div class="mech-key char-key" data-char="x" data-shift="X">X</div>
+                <div class="mech-key char-key" data-char="c" data-shift="C">C</div>
+                <div class="mech-key char-key" data-char="v" data-shift="V">V</div>
+                <div class="mech-key char-key" data-char="b" data-shift="B">B</div>
+                <div class="mech-key char-key" data-char="n" data-shift="N">N</div>
+                <div class="mech-key char-key" data-char="m" data-shift="M">M</div>
+                <div class="mech-key" data-char="," data-shift="&lt;"><span class="sub-legend">&lt;</span><span class="main-legend">,</span></div>
+                <div class="mech-key" data-char="." data-shift="&gt;"><span class="sub-legend">&gt;</span><span class="main-legend">.</span></div>
+                <div class="mech-key" data-char="/" data-shift="?"><span class="sub-legend">?</span><span class="main-legend">/</span></div>
+                <div class="mech-key w-2-75" data-modifier="shift" id="keyShiftR">⇧ Shift</div>
+              </div>
+
+              <!-- Row 5: Bottom Space Row -->
+              <div class="mech-row">
+                <div class="mech-key w-1-25" data-modifier="ctrl" id="keyCtrlL">Ctrl</div>
+                <div class="mech-key w-1-25" data-key="cmd">Win</div>
+                <div class="mech-key w-1-25" data-modifier="alt" id="keyAltL">Alt</div>
+                <div class="mech-key w-space" data-key="space" id="keySpace">Space</div>
+                <div class="mech-key w-1-25" data-modifier="alt" id="keyAltR">Alt</div>
+                <div class="mech-key w-1-25" data-key="fn">Fn</div>
+                <div class="mech-key w-1-25" data-modifier="ctrl" id="keyCtrlR">Ctrl</div>
+              </div>
+            </div>
+
+            <!-- Right: Nav & Arrow Deck -->
+            <div class="mech-nav-deck">
+              <!-- Row 0: Top Nav -->
+              <div class="mech-row">
+                <div class="mech-key" data-key="print_screen">PrtSc</div>
+                <div class="mech-key" data-key="scroll_lock">ScrLk</div>
+                <div class="mech-key" data-key="pause">Pause</div>
+              </div>
+
+              <!-- Row 1: Insert, Home, PgUp -->
+              <div class="mech-row">
+                <div class="mech-key" data-key="insert">Ins</div>
+                <div class="mech-key" data-key="home">Home</div>
+                <div class="mech-key" data-key="page_up">PgUp</div>
+              </div>
+
+              <!-- Row 2: Delete, End, PgDn -->
+              <div class="mech-row">
+                <div class="mech-key" data-key="delete">Del</div>
+                <div class="mech-key" data-key="end">End</div>
+                <div class="mech-key" data-key="page_down">PgDn</div>
+              </div>
+
+              <!-- Row 3: Spacer -->
+              <div class="mech-row">
+                <div class="mech-nav-spacer"></div>
+              </div>
+
+              <!-- Row 4: Arrow Up -->
+              <div class="mech-row">
+                <div style="flex:1;"></div>
+                <div class="mech-key" data-key="up">↑</div>
+                <div style="flex:1;"></div>
+              </div>
+
+              <!-- Row 5: Arrows Left, Down, Right -->
+              <div class="mech-row">
+                <div class="mech-key" data-key="left">←</div>
+                <div class="mech-key" data-key="down">↓</div>
+                <div class="mech-key" data-key="right">→</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2470,33 +2788,303 @@
     setupConcentricThumbstick(document.getElementById("l2StickLeft"), document.getElementById("l2KnobLeft"), false);
     setupConcentricThumbstick(document.getElementById("l2StickRight"), document.getElementById("l2KnobRight"), true);
 
-    // ==================== Keyboard Inputs ====================
-    const kbText = document.getElementById("kbText");
-    const kbSend = document.getElementById("kbSend");
-    const kbClear = document.getElementById("kbClear");
-    const kbKeyButtons = document.querySelectorAll(".kb-key-btn");
+    // ==================== MECHANICAL KEYBOARD ENGINE ====================
+    let mechSoundEnabled = true;
+    let isShiftActive = false;
+    let isCapsLock = false;
+    let isCtrlActive = false;
+    let isAltActive = false;
 
-    kbSend.addEventListener("click", () => {
-      const text = kbText.value;
-      if (text && socket.connected) {
-        triggerHaptic("tap");
-        socket.emit("text", { text });
+    const mechSoundToggle = document.getElementById("mechSoundToggle");
+    const mechCapsIndicator = document.getElementById("mechCapsIndicator");
+    const keyCapsLock = document.getElementById("keyCapsLock");
+    const keyShiftL = document.getElementById("keyShiftL");
+    const keyShiftR = document.getElementById("keyShiftR");
+    const keyCtrlL = document.getElementById("keyCtrlL");
+    const keyCtrlR = document.getElementById("keyCtrlR");
+    const keyAltL = document.getElementById("keyAltL");
+    const keyAltR = document.getElementById("keyAltR");
+    const mechFullscreenBtn = document.getElementById("mechFullscreenBtn");
+
+    // Sound toggle
+    if (mechSoundToggle) {
+      mechSoundToggle.addEventListener("click", () => {
+        mechSoundEnabled = !mechSoundEnabled;
+        mechSoundToggle.classList.toggle("active", mechSoundEnabled);
+        mechSoundToggle.textContent = mechSoundEnabled ? "🔊 Click Sound: ON" : "🔇 Click Sound: OFF";
+        triggerHaptic("click");
+      });
+    }
+
+    // Mechanical Switch Acoustic Synthesizer (Cherry MX Blue / Thock)
+    function playMechanicalSwitchSound(keyType = "regular") {
+      if (!mechSoundEnabled) return;
+      try {
+        if (!audioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) audioCtx = new AudioCtx();
+        }
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume().catch(() => {});
+        }
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime;
+
+        if (keyType === "space") {
+          // Deep hollow stabilizer thud + spring clack
+          const osc1 = audioCtx.createOscillator();
+          const gain1 = audioCtx.createGain();
+          osc1.type = "sine";
+          osc1.frequency.setValueAtTime(140, now);
+          osc1.frequency.exponentialRampToValueAtTime(45, now + 0.05);
+          gain1.gain.setValueAtTime(0.35, now);
+          gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc1.connect(gain1);
+          gain1.connect(audioCtx.destination);
+          osc1.start(now);
+          osc1.stop(now + 0.05);
+
+          // Subtle stabilizer click
+          const osc2 = audioCtx.createOscillator();
+          const gain2 = audioCtx.createGain();
+          osc2.type = "triangle";
+          osc2.frequency.setValueAtTime(2100, now);
+          osc2.frequency.exponentialRampToValueAtTime(300, now + 0.015);
+          gain2.gain.setValueAtTime(0.18, now);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
+          osc2.connect(gain2);
+          gain2.connect(audioCtx.destination);
+          osc2.start(now);
+          osc2.stop(now + 0.015);
+
+        } else if (keyType === "enter" || keyType === "backspace") {
+          // Solid mechanical clack
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(1200, now);
+          osc.frequency.exponentialRampToValueAtTime(90, now + 0.035);
+          gain.gain.setValueAtTime(0.28, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.035);
+
+        } else {
+          // Crisp mechanical blue switch click
+          const oscSnap = audioCtx.createOscillator();
+          const gainSnap = audioCtx.createGain();
+          oscSnap.type = "sine";
+          oscSnap.frequency.setValueAtTime(1750, now);
+          oscSnap.frequency.exponentialRampToValueAtTime(320, now + 0.018);
+          gainSnap.gain.setValueAtTime(0.25, now);
+          gainSnap.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
+          oscSnap.connect(gainSnap);
+          gainSnap.connect(audioCtx.destination);
+          oscSnap.start(now);
+          oscSnap.stop(now + 0.018);
+
+          // Bottom out bottom body clack
+          const oscThud = audioCtx.createOscillator();
+          const gainThud = audioCtx.createGain();
+          oscThud.type = "triangle";
+          oscThud.frequency.setValueAtTime(220, now + 0.004);
+          oscThud.frequency.exponentialRampToValueAtTime(60, now + 0.032);
+          gainThud.gain.setValueAtTime(0.22, now + 0.004);
+          gainThud.gain.exponentialRampToValueAtTime(0.001, now + 0.032);
+          oscThud.connect(gainThud);
+          gainThud.connect(audioCtx.destination);
+          oscThud.start(now + 0.004);
+          oscThud.stop(now + 0.032);
+        }
+      } catch (e) {}
+    }
+
+    // Refresh dynamic key labels for Shift & Caps
+    function refreshKeyboardLegends() {
+      const isUpper = (isShiftActive && !isCapsLock) || (!isShiftActive && isCapsLock);
+
+      document.querySelectorAll(".mech-key.char-key").forEach(keyEl => {
+        const baseChar = keyEl.dataset.char;
+        keyEl.textContent = isUpper ? baseChar.toUpperCase() : baseChar.toLowerCase();
+      });
+
+      // Update number and symbol keys
+      document.querySelectorAll(".mech-key[data-shift]").forEach(keyEl => {
+        const mainLegend = keyEl.querySelector(".main-legend");
+        const subLegend = keyEl.querySelector(".sub-legend");
+        if (mainLegend && subLegend) {
+          if (isShiftActive) {
+            mainLegend.style.fontWeight = "800";
+            mainLegend.style.color = "#2563eb";
+            subLegend.style.opacity = "0.4";
+          } else {
+            mainLegend.style.fontWeight = "700";
+            mainLegend.style.color = "";
+            subLegend.style.opacity = "0.65";
+          }
+        }
+      });
+    }
+
+    // Mechanical Key Press Handler
+    function handleMechanicalKeyPress(keyEl) {
+      keyEl.classList.add("active-press");
+      setTimeout(() => keyEl.classList.remove("active-press"), 110);
+
+      const keyName = keyEl.dataset.key;
+      const charVal = keyEl.dataset.char;
+      const shiftVal = keyEl.dataset.shift;
+      const modifier = keyEl.dataset.modifier;
+
+      // Haptics & Sound
+      if (keyName === "space") {
+        playMechanicalSwitchSound("space");
+        triggerHaptic("dragStart"); // 36ms punchy thud
+      } else if (keyName === "enter" || keyName === "backspace") {
+        playMechanicalSwitchSound("enter");
+        triggerHaptic("gpBumper"); // 35ms
+      } else {
+        playMechanicalSwitchSound("regular");
+        triggerHaptic("gpButton"); // 30ms mechanical click
       }
-    });
 
-    kbClear.addEventListener("click", () => {
-      kbText.value = "";
-      triggerHaptic("tap");
-    });
+      // Modifiers Latch Handling (Shift, Ctrl, Alt)
+      if (modifier === "shift") {
+        isShiftActive = !isShiftActive;
+        if (keyShiftL) keyShiftL.classList.toggle("latched", isShiftActive);
+        if (keyShiftR) keyShiftR.classList.toggle("latched", isShiftActive);
+        refreshKeyboardLegends();
+        return;
+      }
 
-    kbKeyButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const keyName = btn.dataset.key;
-        if (!keyName) return;
-        triggerHaptic("tap");
-        socket.emit("key", { name: keyName, action: "tap" });
+      if (modifier === "ctrl") {
+        isCtrlActive = !isCtrlActive;
+        if (keyCtrlL) keyCtrlL.classList.toggle("latched", isCtrlActive);
+        if (keyCtrlR) keyCtrlR.classList.toggle("latched", isCtrlActive);
+        return;
+      }
+
+      if (modifier === "alt") {
+        isAltActive = !isAltActive;
+        if (keyAltL) keyAltL.classList.toggle("latched", isAltActive);
+        if (keyAltR) keyAltR.classList.toggle("latched", isAltActive);
+        return;
+      }
+
+      // Caps Lock Toggle
+      if (keyName === "caps_lock") {
+        isCapsLock = !isCapsLock;
+        if (keyCapsLock) keyCapsLock.classList.toggle("latched", isCapsLock);
+        if (mechCapsIndicator) mechCapsIndicator.classList.toggle("active", isCapsLock);
+        refreshKeyboardLegends();
+        socket.emit("key", { name: "caps_lock", action: "tap" });
+        return;
+      }
+
+      // Determine Character or Special Key Payload
+      let sendPayload = null;
+
+      if (charVal) {
+        if (isShiftActive && shiftVal) {
+          sendPayload = shiftVal;
+        } else {
+          const isUpper = (isShiftActive && !isCapsLock) || (!isShiftActive && isCapsLock);
+          sendPayload = isUpper ? charVal.toUpperCase() : charVal.toLowerCase();
+        }
+      } else if (keyName) {
+        sendPayload = keyName;
+      }
+
+      if (!sendPayload) return;
+
+      // Handle active modifiers (e.g. Ctrl + C, Alt + Tab)
+      if (isCtrlActive) {
+        socket.emit("key", { name: "ctrl", action: "press" });
+      }
+      if (isAltActive) {
+        socket.emit("key", { name: "alt", action: "press" });
+      }
+
+      socket.emit("key", { name: sendPayload, action: "tap" });
+
+      if (isCtrlActive) {
+        socket.emit("key", { name: "ctrl", action: "release" });
+        isCtrlActive = false;
+        if (keyCtrlL) keyCtrlL.classList.remove("latched");
+        if (keyCtrlR) keyCtrlR.classList.remove("latched");
+      }
+      if (isAltActive) {
+        socket.emit("key", { name: "alt", action: "release" });
+        isAltActive = false;
+        if (keyAltL) keyAltL.classList.remove("latched");
+        if (keyAltR) keyAltR.classList.remove("latched");
+      }
+
+      // If shift was one-time latched, reset it
+      if (isShiftActive) {
+        isShiftActive = false;
+        if (keyShiftL) keyShiftL.classList.remove("latched");
+        if (keyShiftR) keyShiftR.classList.remove("latched");
+        refreshKeyboardLegends();
+      }
+    }
+
+    // Attach listeners to all physical mechanical keys
+    document.querySelectorAll(".mech-key").forEach(keyEl => {
+      keyEl.addEventListener("touchstart", (e) => {
+        if (e.cancelable) e.preventDefault();
+        handleMechanicalKeyPress(keyEl);
+      }, { passive: false });
+
+      keyEl.addEventListener("mousedown", (e) => {
+        handleMechanicalKeyPress(keyEl);
       });
     });
+
+    // Keyboard Fullscreen Toggle
+    function updateMechFullscreenUI() {
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (mechFullscreenBtn) {
+        const enterIcon = mechFullscreenBtn.querySelector(".fs-icon-enter");
+        const exitIcon = mechFullscreenBtn.querySelector(".fs-icon-exit");
+        const label = mechFullscreenBtn.querySelector("span");
+        if (enterIcon && exitIcon) {
+          enterIcon.style.display = isFs ? "none" : "block";
+          exitIcon.style.display = isFs ? "block" : "none";
+        }
+        if (label) label.textContent = isFs ? "Exit Full" : "Fullscreen";
+        mechFullscreenBtn.classList.toggle("is-fullscreen", isFs);
+      }
+    }
+
+    if (mechFullscreenBtn) {
+      mechFullscreenBtn.addEventListener("click", () => {
+        triggerHaptic("click");
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const target = document.documentElement;
+          if (target.requestFullscreen) {
+            target.requestFullscreen().catch(() => {});
+          } else if (target.webkitRequestFullscreen) {
+            target.webkitRequestFullscreen();
+          }
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock("landscape").catch(() => {});
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+        }
+      });
+    }
+
+    document.addEventListener("fullscreenchange", updateMechFullscreenUI);
+    document.addEventListener("webkitfullscreenchange", updateMechFullscreenUI);
 
     // ==================== Media Controls ====================
     const mediaButtons = document.querySelectorAll(".media-btn");

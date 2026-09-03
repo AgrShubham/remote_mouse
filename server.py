@@ -18,15 +18,44 @@ KEY_MAP = {
     "tab": Key.tab,
     "esc": Key.esc,
     "space": Key.space,
+    "shift": Key.shift,
+    "shift_l": Key.shift_l,
+    "shift_r": Key.shift_r,
+    "ctrl": Key.ctrl,
+    "ctrl_l": Key.ctrl_l,
+    "ctrl_r": Key.ctrl_r,
+    "alt": Key.alt,
+    "alt_l": Key.alt_l,
+    "alt_r": Key.alt_r,
+    "caps_lock": Key.caps_lock,
+    "cmd": Key.cmd,
     "up": Key.up,
     "down": Key.down,
     "left": Key.left,
     "right": Key.right,
     "delete": Key.delete,
+    "insert": Key.insert,
     "home": Key.home,
     "end": Key.end,
     "page_up": Key.page_up,
     "page_down": Key.page_down,
+    "print_screen": Key.print_screen,
+    "scroll_lock": Key.scroll_lock,
+    "pause": Key.pause,
+
+    # Function keys F1 - F12
+    "f1": Key.f1,
+    "f2": Key.f2,
+    "f3": Key.f3,
+    "f4": Key.f4,
+    "f5": Key.f5,
+    "f6": Key.f6,
+    "f7": Key.f7,
+    "f8": Key.f8,
+    "f9": Key.f9,
+    "f10": Key.f10,
+    "f11": Key.f11,
+    "f12": Key.f12,
 
     # Media keys (support can vary by OS)
     "media_play_pause": Key.media_play_pause,
@@ -146,10 +175,14 @@ def handle_key(data):
         if not name:
             return
 
-        key = KEY_MAP.get(name)
+        name_str = str(name)
+        key = KEY_MAP.get(name_str.lower())
         if not key:
-            print(f"Unknown key requested: {name}")
-            return
+            if len(name_str) == 1:
+                key = name_str
+            else:
+                print(f"Unknown key requested: {name}")
+                return
 
         action = data.get("action", "tap")
 
