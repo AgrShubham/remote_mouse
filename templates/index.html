@@ -225,6 +225,50 @@
       100% { transform: scale(1); background: rgba(79, 140, 255, 0.12); }
     }
 
+    .trackpad-fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #e5e5ea;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.15s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .trackpad-fullscreen-btn:active {
+      transform: scale(0.94);
+      background: rgba(79, 140, 255, 0.3);
+      border-color: #60a5fa;
+      color: #ffffff;
+    }
+
+    .trackpad-fullscreen-btn.is-fullscreen {
+      background: rgba(52, 211, 153, 0.15);
+      border-color: rgba(52, 211, 153, 0.4);
+      color: #34d399;
+    }
+
+    :fullscreen #view-touchpad,
+    :-webkit-full-screen #view-touchpad {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      width: 100vw;
+      height: 100dvh;
+      background: #0b0c10;
+      padding: calc(6px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) calc(10px + env(safe-area-inset-left, 0px));
+      box-sizing: border-box;
+    }
+
     /* Monolithic Trackpad Glass Surface */
     .mac-trackpad-frame {
       flex: 1;
@@ -1379,6 +1423,15 @@
             </svg>
             Haptics
           </div>
+          <button class="trackpad-fullscreen-btn" id="trackpadFullscreenBtn" title="Toggle Fullscreen">
+            <svg class="fs-icon-enter" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            <svg class="fs-icon-exit" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <path d="M4 14h6v6m10-10h-6V4m0 6 7-7M3 21l7-7"></path>
+            </svg>
+            <span>Fullscreen</span>
+          </button>
         </div>
 
         <!-- Monolithic Glass Trackpad Surface -->
@@ -2026,6 +2079,47 @@
       userSpeedMultiplier = parseFloat(speedSlider.value);
       speedLabel.textContent = userSpeedMultiplier.toFixed(1) + "×";
     });
+
+    // ==================== Trackpad Fullscreen Toggle ====================
+    const trackpadFullscreenBtn = document.getElementById("trackpadFullscreenBtn");
+
+    function updateTrackpadFullscreenUI() {
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (trackpadFullscreenBtn) {
+        const enterIcon = trackpadFullscreenBtn.querySelector(".fs-icon-enter");
+        const exitIcon = trackpadFullscreenBtn.querySelector(".fs-icon-exit");
+        const label = trackpadFullscreenBtn.querySelector("span");
+        if (enterIcon && exitIcon) {
+          enterIcon.style.display = isFs ? "none" : "block";
+          exitIcon.style.display = isFs ? "block" : "none";
+        }
+        if (label) label.textContent = isFs ? "Exit Full" : "Fullscreen";
+        trackpadFullscreenBtn.classList.toggle("is-fullscreen", isFs);
+      }
+    }
+
+    if (trackpadFullscreenBtn) {
+      trackpadFullscreenBtn.addEventListener("click", () => {
+        triggerHaptic("click");
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const target = document.documentElement;
+          if (target.requestFullscreen) {
+            target.requestFullscreen().catch(() => {});
+          } else if (target.webkitRequestFullscreen) {
+            target.webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+        }
+      });
+    }
+
+    document.addEventListener("fullscreenchange", updateTrackpadFullscreenUI);
+    document.addEventListener("webkitfullscreenchange", updateTrackpadFullscreenUI);
 
     // ==================== MacBook Pointer Physics ====================
     function calculateAcceleratedDelta(rawDx, rawDy, dtMs) {
