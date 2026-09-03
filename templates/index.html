@@ -54,17 +54,18 @@
 
     /* Header */
     .header {
-      padding: 10px 16px 8px;
+      padding: 8px 14px 6px;
       text-align: center;
       background: linear-gradient(to bottom, #161720, #101117);
       border-bottom: 1px solid var(--border);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
       z-index: 10;
+      flex-shrink: 0;
     }
 
     .app-title {
       font-weight: 600;
-      font-size: 16px;
+      font-size: 15px;
       letter-spacing: 0.02em;
       display: flex;
       align-items: center;
@@ -82,7 +83,7 @@
 
     #status {
       font-size: 11px;
-      margin-top: 2px;
+      margin-top: 1px;
       color: var(--text-muted);
       transition: color 0.2s;
     }
@@ -90,24 +91,26 @@
     /* Tabs */
     .tabs {
       display: flex;
-      padding: 6px 12px;
-      gap: 8px;
+      padding: 6px 10px;
+      gap: 6px;
       background: #0f1015;
       border-bottom: 1px solid var(--border);
       z-index: 10;
+      flex-shrink: 0;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 8px 6px;
+      padding: 7px 4px;
       border-radius: 10px;
       border: 1px solid transparent;
       background: transparent;
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s ease;
+      text-align: center;
     }
 
     .tab-btn.active {
@@ -122,8 +125,8 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 8px 10px;
-      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      padding: 6px 10px;
+      padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
       gap: 6px;
       min-height: 0;
       overflow: hidden;
@@ -155,6 +158,7 @@
       border-radius: 12px;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      flex-shrink: 0;
     }
 
     .toolbar-left {
@@ -389,6 +393,389 @@
       opacity: 0.35;
     }
 
+    /* ==================== Gamepad View ==================== */
+    
+    #view-gamepad {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      gap: 6px;
+    }
+
+    .gamepad-hud {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(22, 23, 31, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .preset-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .preset-selector select {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .preset-selector select option {
+      background: #191a24;
+      color: #fff;
+    }
+
+    .fullscreen-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(79, 140, 255, 0.15);
+      border: 1px solid rgba(79, 140, 255, 0.35);
+      color: #93bbfd;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Shoulder Triggers */
+    .gamepad-triggers-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .trigger-cluster {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .trigger-cluster.right-cluster {
+      flex-direction: row-reverse;
+    }
+
+    .gp-trigger-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #232535 0%, #14151f 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: transform 0.08s, background 0.08s, border-color 0.08s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .gp-trigger-btn span.label {
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .gp-trigger-btn.active-press {
+      background: linear-gradient(180deg, rgba(79, 140, 255, 0.4) 0%, rgba(37, 99, 235, 0.6) 100%);
+      border-color: #60a5fa;
+      box-shadow: 0 0 16px rgba(79, 140, 255, 0.5), inset 0 2px 6px rgba(0, 0, 0, 0.6);
+      transform: scale(0.96) translateY(2px);
+    }
+
+    /* Main Gamepad Deck Body */
+    .gamepad-deck {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      min-height: 0;
+      background: linear-gradient(175deg, #181924 0%, #0e0f16 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      padding: 8px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 12px 36px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .deck-wing {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      position: relative;
+      min-height: 0;
+    }
+
+    .deck-center {
+      width: 58px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      padding: 8px 0;
+      flex-shrink: 0;
+    }
+
+    .gp-center-btn {
+      width: 52px;
+      padding: 6px 0;
+      border-radius: 999px;
+      background: #202230;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .gp-center-btn.active-press {
+      background: #33364c;
+      color: #fff;
+    }
+
+    /* Precision D-Pad */
+    .dpad-container {
+      width: 110px;
+      height: 110px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .dpad-btn {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      background: #202230;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9496a8;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.08s, color 0.08s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .dpad-up { top: 0; left: 37px; border-radius: 8px 8px 0 0; }
+    .dpad-down { bottom: 0; left: 37px; border-radius: 0 0 8px 8px; }
+    .dpad-left { top: 37px; left: 0; border-radius: 8px 0 0 8px; }
+    .dpad-right { top: 37px; right: 0; border-radius: 0 8px 8px 0; }
+    .dpad-center {
+      position: absolute;
+      top: 37px;
+      left: 37px;
+      width: 36px;
+      height: 36px;
+      background: #191a24;
+      pointer-events: none;
+    }
+
+    .dpad-btn.active-press {
+      background: rgba(79, 140, 255, 0.35);
+      border-color: #60a5fa;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(79, 140, 255, 0.4);
+    }
+
+    /* Virtual Analog Thumbstick */
+    .analog-stick-base {
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #1a1b26 0%, #101119 75%);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 4px 14px rgba(0,0,0,0.5);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      flex-shrink: 0;
+    }
+
+    .analog-stick-sprint-ring {
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 1px dashed rgba(79, 140, 255, 0.25);
+      pointer-events: none;
+    }
+
+    .analog-stick-knob {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #383a50 0%, #1f202e 70%);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.4);
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: transform 0.05s ease-out;
+    }
+
+    .analog-stick-knob::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(79, 140, 255, 0.4);
+      box-shadow: 0 0 8px rgba(79, 140, 255, 0.7);
+    }
+
+    .analog-stick-knob.sprinting::after {
+      background: #fbbf24;
+      box-shadow: 0 0 10px #fbbf24;
+    }
+
+    /* ABXY Diamond Cluster */
+    .abxy-cluster {
+      width: 118px;
+      height: 118px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .abxy-btn {
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #202230;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.25);
+      transition: transform 0.08s, box-shadow 0.08s, filter 0.08s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .abxy-y { top: 0; left: 40px; border-color: rgba(234, 179, 8, 0.4); color: #facc15; }
+    .abxy-a { bottom: 0; left: 40px; border-color: rgba(34, 197, 94, 0.4); color: #4ade80; }
+    .abxy-x { top: 40px; left: 0; border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; }
+    .abxy-b { top: 40px; right: 0; border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
+
+    .abxy-btn.active-press {
+      transform: scale(0.92) translateY(2px);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.7);
+      filter: brightness(1.3);
+    }
+    .abxy-y.active-press { background: rgba(234, 179, 8, 0.3); border-color: #facc15; box-shadow: 0 0 14px rgba(234, 179, 8, 0.6); }
+    .abxy-a.active-press { background: rgba(34, 197, 94, 0.3); border-color: #4ade80; box-shadow: 0 0 14px rgba(34, 197, 94, 0.6); }
+    .abxy-x.active-press { background: rgba(59, 130, 246, 0.3); border-color: #60a5fa; box-shadow: 0 0 14px rgba(59, 130, 246, 0.6); }
+    .abxy-b.active-press { background: rgba(239, 68, 68, 0.3); border-color: #f87171; box-shadow: 0 0 14px rgba(239, 68, 68, 0.6); }
+
+    /* Steam Deck-Style Camera Look Pad */
+    .steam-look-pad {
+      width: 118px;
+      height: 118px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 50% 50%, #1e1f2b 0%, #111219 75%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 4px 14px rgba(0,0,0,0.5);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      cursor: crosshair;
+      flex-shrink: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .steam-look-pad span.pad-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      pointer-events: none;
+    }
+
+    .steam-look-crosshair {
+      width: 32px;
+      height: 32px;
+      border: 1px dashed rgba(79, 140, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 4px;
+      pointer-events: none;
+    }
+
+    .steam-look-crosshair::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    /* Active Keys HUD */
+    .gamepad-keys-hud {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: monospace;
+      padding: 3px 6px;
+      background: rgba(14, 15, 21, 0.7);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      min-height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
     /* ==================== Keyboard View ==================== */
     .card {
       background: rgba(18, 19, 26, 0.96);
@@ -545,7 +932,7 @@
 
     @media (min-width: 700px) {
       .content {
-        max-width: 500px;
+        max-width: 540px;
         margin: 0 auto;
         width: 100%;
       }
@@ -566,6 +953,7 @@
     <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" data-view="touchpad">Trackpad</button>
+      <button class="tab-btn" data-view="gamepad">Gamepad</button>
       <button class="tab-btn" data-view="keyboard">Keyboard</button>
       <button class="tab-btn" data-view="media">Media</button>
     </div>
@@ -631,6 +1019,103 @@
           <span class="guide-sep">•</span>
           <span class="guide-item">Bottom: Click Zones</span>
         </div>
+      </div>
+
+      <!-- ==================== Gamepad View ==================== -->
+      <div id="view-gamepad" class="view">
+        <!-- Gamepad HUD -->
+        <div class="gamepad-hud">
+          <div class="preset-selector">
+            <span>🎮 Preset:</span>
+            <select id="gpPresetSelect">
+              <option value="fps">FPS / Action (WASD + Mouse)</option>
+              <option value="racing">Racing / Driving</option>
+              <option value="platformer">Platformer / Retro</option>
+            </select>
+          </div>
+
+          <button id="gpFullscreenBtn" class="fullscreen-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            Fullscreen
+          </button>
+        </div>
+
+        <!-- Shoulder Triggers Bar -->
+        <div class="gamepad-triggers-bar">
+          <!-- Left Triggers (LT, LB) -->
+          <div class="trigger-cluster">
+            <div class="gp-trigger-btn" data-control="lt" id="gpBtnLT">
+              <span>LT</span>
+              <span class="label" id="gpLabelLT">AIM</span>
+            </div>
+            <div class="gp-trigger-btn bumper" data-control="lb" id="gpBtnLB">
+              <span>LB</span>
+              <span class="label" id="gpLabelLB">Q</span>
+            </div>
+          </div>
+
+          <!-- Right Triggers (RT, RB) -->
+          <div class="trigger-cluster right-cluster">
+            <div class="gp-trigger-btn" data-control="rt" id="gpBtnRT">
+              <span>RT</span>
+              <span class="label" id="gpLabelRT">FIRE</span>
+            </div>
+            <div class="gp-trigger-btn bumper" data-control="rb" id="gpBtnRB">
+              <span>RB</span>
+              <span class="label" id="gpLabelRB">F</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Gamepad Deck -->
+        <div class="gamepad-deck">
+          <!-- Left Wing: Thumbstick & D-Pad -->
+          <div class="deck-wing">
+            <!-- D-Pad -->
+            <div class="dpad-container" id="gpDpad">
+              <div class="dpad-btn dpad-up" data-control="dpad_up">▲</div>
+              <div class="dpad-btn dpad-left" data-control="dpad_left">◀</div>
+              <div class="dpad-center"></div>
+              <div class="dpad-btn dpad-right" data-control="dpad_right">▶</div>
+              <div class="dpad-btn dpad-down" data-control="dpad_down">▼</div>
+            </div>
+
+            <!-- Virtual Analog Stick -->
+            <div class="analog-stick-base" id="gpAnalogStick">
+              <div class="analog-stick-sprint-ring"></div>
+              <div class="analog-stick-knob" id="gpStickKnob"></div>
+            </div>
+          </div>
+
+          <!-- Center Console: Select, Start, Logo -->
+          <div class="deck-center">
+            <button class="gp-center-btn" data-control="select" id="gpBtnSelect">VIEW</button>
+            <div style="font-size:18px; opacity:0.4;">⚡</div>
+            <button class="gp-center-btn" data-control="start" id="gpBtnStart">MENU</button>
+          </div>
+
+          <!-- Right Wing: ABXY & Steam Look Trackpad -->
+          <div class="deck-wing">
+            <!-- ABXY Diamond -->
+            <div class="abxy-cluster" id="gpAbxy">
+              <div class="abxy-btn abxy-y" data-control="btn_y" id="gpBtnY">Y</div>
+              <div class="abxy-btn abxy-x" data-control="btn_x" id="gpBtnX">X</div>
+              <div class="abxy-btn abxy-b" data-control="btn_b" id="gpBtnB">B</div>
+              <div class="abxy-btn abxy-a" data-control="btn_a" id="gpBtnA">A</div>
+            </div>
+
+            <!-- Steam Deck-Style Camera Look Pad -->
+            <div class="steam-look-pad" id="steamLookPad">
+              <span class="pad-title">AIM / CAMERA</span>
+              <div class="steam-look-crosshair"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Keys HUD -->
+        <div class="gamepad-keys-hud" id="gpActiveKeysHud">Active: None</div>
       </div>
 
       <!-- Keyboard View -->
@@ -731,6 +1216,7 @@
     const tabButtons = document.querySelectorAll(".tab-btn");
     const views = {
       touchpad: document.getElementById("view-touchpad"),
+      gamepad: document.getElementById("view-gamepad"),
       keyboard: document.getElementById("view-keyboard"),
       media: document.getElementById("view-media"),
     };
@@ -742,12 +1228,16 @@
         Object.entries(views).forEach(([name, el]) => {
           el.classList.toggle("active", name === viewName);
         });
+
+        // If leaving gamepad view, release all active keys
+        if (viewName !== "gamepad") {
+          socket.emit("gamepad_release_all");
+        }
       });
     });
 
     // ==================== Haptic Feedback Engine ====================
     function triggerHaptic(type = "click") {
-      // Visual feedback pulse on the haptic indicator
       if (hapticBadge) {
         hapticBadge.classList.remove("pulse");
         void hapticBadge.offsetWidth;
@@ -758,10 +1248,10 @@
 
       try {
         switch (type) {
-          case "click": // Crisp single click (Left Click / Tap)
+          case "click": // Crisp single click
             navigator.vibrate(14);
             break;
-          case "rightClick": // Distinct double pulse (Right Click / 2-finger tap)
+          case "rightClick": // Distinct double pulse
             navigator.vibrate([18, 30, 22]);
             break;
           case "tap": // Ultra-light micro-tick
@@ -773,9 +1263,28 @@
           case "scroll": // Micro tick
             navigator.vibrate(6);
             break;
+          // Gamepad specific waveforms
+          case "gpTrigger": // Deep trigger recoil
+            navigator.vibrate(35);
+            break;
+          case "gpButton": // Crisp mechanical face button
+            navigator.vibrate(14);
+            break;
+          case "gpBumper": // Snappy bumper switch
+            navigator.vibrate(18);
+            break;
+          case "gpDpad": // Micro directional click
+            navigator.vibrate(10);
+            break;
+          case "gpSprint": // Sprint ring activation
+            navigator.vibrate([14, 28, 18]);
+            break;
+          case "gpCameraTick": // Micro trackball bearing tick
+            navigator.vibrate(5);
+            break;
         }
       } catch (e) {
-        // Safe catch for restricted browser policies
+        // Safe catch for browser restrictions
       }
     }
 
@@ -790,18 +1299,12 @@
     });
 
     // ==================== MacBook Pointer Physics ====================
-    // Non-linear acceleration (ballistics)
     function calculateAcceleratedDelta(rawDx, rawDy, dtMs) {
       const dist = Math.hypot(rawDx, rawDy);
       if (dist === 0 || dtMs <= 0) return { dx: 0, dy: 0 };
 
-      // Instantaneous velocity (pixels / millisecond)
       const velocity = dist / Math.max(dtMs, 4);
 
-      // Smooth acceleration curve:
-      // Low velocity (< 0.25): precision mode (down to 0.85x for pixel accuracy)
-      // Medium velocity (0.25 - 1.2): standard tracking (1.1x to 2.3x)
-      // High velocity (> 1.2): exponential flick boost (up to 4.2x)
       let curveFactor;
       if (velocity < 0.25) {
         curveFactor = 0.85 + (velocity / 0.25) * 0.25;
@@ -865,7 +1368,6 @@
           return;
         }
 
-        // Apply friction decay (0.92 per frame, just like macOS / iOS)
         momentumVy *= 0.92;
         momentumVx *= 0.92;
 
@@ -886,7 +1388,6 @@
     const leftClickZone = document.getElementById("leftClickZone");
     const rightClickZone = document.getElementById("rightClickZone");
 
-    // Gesture tracking state
     let touchStartTime = 0;
     let touchStartX = 0;
     let touchStartY = 0;
@@ -899,7 +1400,6 @@
     let isDragging = false;
     let dragLockTimer = null;
 
-    // Two-finger state
     let twoFingerStartDist = 0;
     let twoFingerMidX = 0;
     let twoFingerMidY = 0;
@@ -920,10 +1420,8 @@
       };
     }
 
-    // Touch Start
     motionZone.addEventListener("touchstart", (e) => {
       stopMomentumScroll();
-
       const numTouches = e.touches.length;
 
       if (numTouches === 1) {
@@ -937,7 +1435,6 @@
         lastTime = now;
         longPressFired = false;
 
-        // Check for Tap-and-hold (Drag Lock)
         const timeSinceLastTap = now - lastTapTime;
         if (timeSinceLastTap < 320 && !isDragging) {
           dragLockTimer = setTimeout(() => {
@@ -948,7 +1445,6 @@
           }, 140);
         }
 
-        // Schedule Long Press (Right click)
         clearTimeout(longPressTimer);
         longPressTimer = setTimeout(() => {
           if (!isDragging) {
@@ -959,7 +1455,6 @@
         }, 520);
 
       } else if (numTouches === 2) {
-        // Cancel single touch long press & drag timer
         clearTimeout(longPressTimer);
         clearTimeout(dragLockTimer);
 
@@ -975,9 +1470,8 @@
       }
     }, { passive: false });
 
-    // Touch Move
     motionZone.addEventListener("touchmove", (e) => {
-      e.preventDefault(); // Prevent mobile viewport scrolling
+      e.preventDefault();
       const numTouches = e.touches.length;
 
       if (numTouches === 1 && !twoFingerMoved) {
@@ -1015,11 +1509,9 @@
         twoFingerMidY = mid.y;
         lastScrollTime = now;
 
-        // Track velocity for momentum flick
         scrollVelX = (dMidX / dt) * 16;
         scrollVelY = (dMidY / dt) * 16;
 
-        // Emit smooth scroll
         if (Math.abs(dMidX) > 0.5 || Math.abs(dMidY) > 0.5) {
           socket.emit("scroll", {
             dx: -dMidX * 0.7,
@@ -1029,14 +1521,12 @@
       }
     }, { passive: false });
 
-    // Touch End
     motionZone.addEventListener("touchend", (e) => {
       clearTimeout(longPressTimer);
       clearTimeout(dragLockTimer);
 
       const now = performance.now();
 
-      // Release Dragging if active
       if (isDragging) {
         isDragging = false;
         dragPill.classList.remove("active");
@@ -1044,7 +1534,6 @@
         triggerHaptic("click");
       }
 
-      // Check for Two-Finger Tap (Right Click)
       if (twoFingerStartTime > 0 && !twoFingerMoved) {
         const twoFingerDuration = now - twoFingerStartTime;
         if (twoFingerDuration < 280) {
@@ -1055,7 +1544,6 @@
         }
       }
 
-      // Trigger Inertial Momentum Scroll if two-finger flick detected
       if (twoFingerMoved) {
         twoFingerMoved = false;
         if (Math.hypot(scrollVelX, scrollVelY) > 1.2) {
@@ -1065,18 +1553,15 @@
         return;
       }
 
-      // Handle Single Finger Tap
       const dt = now - touchStartTime;
       const movedDist = Math.hypot(lastX - touchStartX, lastY - touchStartY);
 
       if (dt < 260 && movedDist < 18 && !longPressFired) {
         if (now - lastTapTime < 320) {
-          // Double Tap -> Double Click
           triggerHaptic("click");
           socket.emit("click", { button: "left", count: 2 });
           lastTapTime = 0;
         } else {
-          // Single Tap -> Left Click
           triggerHaptic("tap");
           socket.emit("click", { button: "left", count: 1 });
           lastTapTime = now;
@@ -1117,7 +1602,6 @@
       el.addEventListener("touchend", release);
       el.addEventListener("touchcancel", release);
 
-      // Desktop preview support
       el.addEventListener("mousedown", press);
       window.addEventListener("mouseup", release);
     }
@@ -1125,7 +1609,7 @@
     setupClickZone(leftClickZone, "left");
     setupClickZone(rightClickZone, "right");
 
-    // ==================== Desktop Mouse Fallback ====================
+    // Desktop Mouse Fallback
     let isDesktopMouseDown = false;
     let desktopLastX = 0;
     let desktopLastY = 0;
@@ -1147,6 +1631,404 @@
 
     window.addEventListener("mouseup", () => {
       isDesktopMouseDown = false;
+    });
+
+    // ============================================================
+    // ==================== GAMEPAD CONTROLLER ====================
+    // ============================================================
+
+    const GAMEPAD_PRESETS = {
+      fps: {
+        name: "FPS / Action",
+        stick: { up: "w", down: "s", left: "a", right: "d", sprint: "shift" },
+        dpad_up: "1",
+        dpad_down: "3",
+        dpad_left: "2",
+        dpad_right: "4",
+        btn_a: "space",
+        btn_b: "c",
+        btn_x: "r",
+        btn_y: "e",
+        lb: "q",
+        rb: "f",
+        lt: "mouse_right",
+        rt: "mouse_left",
+        select: "tab",
+        start: "esc",
+        labels: { lt: "AIM", lb: "Q", rt: "FIRE", rb: "F" }
+      },
+      racing: {
+        name: "Racing / Driving",
+        stick: { up: "w", down: "s", left: "a", right: "d", sprint: null },
+        dpad_up: "up",
+        dpad_down: "down",
+        dpad_left: "left",
+        dpad_right: "right",
+        btn_a: "space",
+        btn_b: "c",
+        btn_x: "r",
+        btn_y: "n",
+        lb: "q",
+        rb: "e",
+        lt: "s",
+        rt: "w",
+        select: "tab",
+        start: "esc",
+        labels: { lt: "BRAKE", lb: "GEAR-", rt: "GAS", rb: "GEAR+" }
+      },
+      platformer: {
+        name: "Platformer / Retro",
+        stick: { up: "up", down: "down", left: "left", right: "right", sprint: null },
+        dpad_up: "up",
+        dpad_down: "down",
+        dpad_left: "left",
+        dpad_right: "right",
+        btn_a: "space",
+        btn_b: "down",
+        btn_x: "x",
+        btn_y: "c",
+        lb: "z",
+        rb: "shift",
+        lt: "ctrl",
+        rt: "alt",
+        select: "enter",
+        start: "esc",
+        labels: { lt: "CTRL", lb: "Z", rt: "ALT", rb: "DASH" }
+      }
+    };
+
+    let currentPresetKey = "fps";
+    let activePreset = GAMEPAD_PRESETS[currentPresetKey];
+
+    const gpPresetSelect = document.getElementById("gpPresetSelect");
+    const gpFullscreenBtn = document.getElementById("gpFullscreenBtn");
+    const gpActiveKeysHud = document.getElementById("gpActiveKeysHud");
+
+    // Triggers and labels
+    const gpLabelLT = document.getElementById("gpLabelLT");
+    const gpLabelLB = document.getElementById("gpLabelLB");
+    const gpLabelRT = document.getElementById("gpLabelRT");
+    const gpLabelRB = document.getElementById("gpLabelRB");
+
+    function updatePresetLabels() {
+      if (activePreset.labels) {
+        gpLabelLT.textContent = activePreset.labels.lt;
+        gpLabelLB.textContent = activePreset.labels.lb;
+        gpLabelRT.textContent = activePreset.labels.rt;
+        gpLabelRB.textContent = activePreset.labels.rb;
+      }
+    }
+    updatePresetLabels();
+
+    gpPresetSelect.addEventListener("change", (e) => {
+      currentPresetKey = e.target.value;
+      activePreset = GAMEPAD_PRESETS[currentPresetKey] || GAMEPAD_PRESETS.fps;
+      updatePresetLabels();
+      triggerHaptic("gpButton");
+      socket.emit("gamepad_release_all");
+      updateHudKeys();
+    });
+
+    // Fullscreen Toggle
+    gpFullscreenBtn.addEventListener("click", () => {
+      triggerHaptic("click");
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // Tracking active pressed keys for HUD
+    const activeHudKeys = new Set();
+
+    function updateHudKeys() {
+      if (activeHudKeys.size === 0) {
+        gpActiveKeysHud.textContent = `Preset: ${activePreset.name} • Ready`;
+      } else {
+        const list = Array.from(activeHudKeys).map(k => `[${k.toUpperCase()}]`).join(" ");
+        gpActiveKeysHud.textContent = `Active: ${list}`;
+      }
+    }
+
+    // Generic Button Press / Release Binder
+    function bindGamepadButton(el, controlId, hapticType = "gpButton") {
+      if (!el) return;
+
+      function onDown(e) {
+        if (e.cancelable) e.preventDefault();
+        el.classList.add("active-press");
+        triggerHaptic(hapticType);
+
+        const mappedKey = activePreset[controlId];
+        if (mappedKey) {
+          activeHudKeys.add(mappedKey);
+          updateHudKeys();
+          socket.emit("gamepad_button_down", { input: mappedKey });
+        }
+      }
+
+      function onUp(e) {
+        el.classList.remove("active-press");
+        const mappedKey = activePreset[controlId];
+        if (mappedKey) {
+          activeHudKeys.delete(mappedKey);
+          updateHudKeys();
+          socket.emit("gamepad_button_up", { input: mappedKey });
+        }
+      }
+
+      el.addEventListener("touchstart", onDown, { passive: false });
+      el.addEventListener("touchend", onUp);
+      el.addEventListener("touchcancel", onUp);
+
+      el.addEventListener("mousedown", onDown);
+      el.addEventListener("mouseup", onUp);
+      el.addEventListener("mouseleave", onUp);
+    }
+
+    // Bind triggers & bumpers
+    bindGamepadButton(document.getElementById("gpBtnLT"), "lt", "gpTrigger");
+    bindGamepadButton(document.getElementById("gpBtnRT"), "rt", "gpTrigger");
+    bindGamepadButton(document.getElementById("gpBtnLB"), "lb", "gpBumper");
+    bindGamepadButton(document.getElementById("gpBtnRB"), "rb", "gpBumper");
+
+    // Bind ABXY buttons
+    bindGamepadButton(document.getElementById("gpBtnA"), "btn_a", "gpButton");
+    bindGamepadButton(document.getElementById("gpBtnB"), "btn_b", "gpButton");
+    bindGamepadButton(document.getElementById("gpBtnX"), "btn_x", "gpButton");
+    bindGamepadButton(document.getElementById("gpBtnY"), "btn_y", "gpButton");
+
+    // Bind D-Pad
+    document.querySelectorAll(".dpad-btn").forEach(btn => {
+      const controlId = btn.dataset.control;
+      bindGamepadButton(btn, controlId, "gpDpad");
+    });
+
+    // Bind Center Menu / View
+    bindGamepadButton(document.getElementById("gpBtnSelect"), "select", "gpButton");
+    bindGamepadButton(document.getElementById("gpBtnStart"), "start", "gpButton");
+
+    // ==================== Virtual Analog Thumbstick ====================
+    const gpAnalogStick = document.getElementById("gpAnalogStick");
+    const gpStickKnob = document.getElementById("gpStickKnob");
+    let stickTouchId = null;
+    let stickCenterX = 0;
+    let stickCenterY = 0;
+    const STICK_MAX_RADIUS = 38; // px
+    let isSprinting = false;
+    let lastStickKeysString = "";
+
+    function getStickKeys(normX, normY, isSprintActive) {
+      const dist = Math.hypot(normX, normY);
+      if (dist < 0.2) return [];
+
+      const keys = [];
+      const angle = Math.atan2(normY, normX); // radians from -PI to +PI
+      const cfg = activePreset.stick;
+
+      // 8-directional quadrant thresholds
+      const octant = Math.PI / 8;
+      if (angle >= -octant && angle < octant) {
+        // Right
+        keys.push(cfg.right);
+      } else if (angle >= octant && angle < 3 * octant) {
+        // Down-Right
+        keys.push(cfg.down, cfg.right);
+      } else if (angle >= 3 * octant && angle < 5 * octant) {
+        // Down
+        keys.push(cfg.down);
+      } else if (angle >= 5 * octant && angle < 7 * octant) {
+        // Down-Left
+        keys.push(cfg.down, cfg.left);
+      } else if (angle >= 7 * octant || angle < -7 * octant) {
+        // Left
+        keys.push(cfg.left);
+      } else if (angle >= -7 * octant && angle < -5 * octant) {
+        // Up-Left
+        keys.push(cfg.up, cfg.left);
+      } else if (angle >= -5 * octant && angle < -3 * octant) {
+        // Up
+        keys.push(cfg.up);
+      } else if (angle >= -3 * octant && angle < -octant) {
+        // Up-Right
+        keys.push(cfg.up, cfg.right);
+      }
+
+      if (isSprintActive && cfg.sprint) {
+        keys.push(cfg.sprint);
+      }
+
+      return keys;
+    }
+
+    gpAnalogStick.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      if (stickTouchId !== null) return;
+
+      const t = e.changedTouches[0];
+      stickTouchId = t.identifier;
+      const rect = gpAnalogStick.getBoundingClientRect();
+      stickCenterX = rect.left + rect.width / 2;
+      stickCenterY = rect.top + rect.height / 2;
+
+      handleStickMove(t.clientX, t.clientY);
+    }, { passive: false });
+
+    window.addEventListener("touchmove", (e) => {
+      if (stickTouchId === null) return;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (t.identifier === stickTouchId) {
+          e.preventDefault();
+          handleStickMove(t.clientX, t.clientY);
+          break;
+        }
+      }
+    }, { passive: false });
+
+    function handleStickMove(clientX, clientY) {
+      let dx = clientX - stickCenterX;
+      let dy = clientY - stickCenterY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > STICK_MAX_RADIUS) {
+        dx = (dx / dist) * STICK_MAX_RADIUS;
+        dy = (dy / dist) * STICK_MAX_RADIUS;
+      }
+
+      // Visual knob displacement
+      gpStickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+
+      // Normalized coordinates (-1 to 1)
+      const normX = dx / STICK_MAX_RADIUS;
+      const normY = dy / STICK_MAX_RADIUS;
+      const normDist = dist / STICK_MAX_RADIUS;
+
+      // Sprint activation threshold (85% radius)
+      const sprintNow = normDist > 0.82;
+      if (sprintNow && !isSprinting && activePreset.stick.sprint) {
+        isSprinting = true;
+        gpStickKnob.classList.add("sprinting");
+        triggerHaptic("gpSprint");
+      } else if (!sprintNow && isSprinting) {
+        isSprinting = false;
+        gpStickKnob.classList.remove("sprinting");
+      }
+
+      const currentKeys = getStickKeys(normX, normY, isSprinting);
+      const keysString = currentKeys.sort().join(",");
+
+      if (keysString !== lastStickKeysString) {
+        lastStickKeysString = keysString;
+        socket.emit("gamepad_stick_sync", { keys: currentKeys });
+
+        // Update HUD
+        activeHudKeys.clear();
+        currentKeys.forEach(k => activeHudKeys.add(k));
+        updateHudKeys();
+      }
+    }
+
+    function resetStick() {
+      stickTouchId = null;
+      isSprinting = false;
+      gpStickKnob.classList.remove("sprinting");
+      gpStickKnob.style.transform = "translate(0px, 0px)";
+
+      if (lastStickKeysString !== "") {
+        lastStickKeysString = "";
+        socket.emit("gamepad_stick_sync", { keys: [] });
+        activeHudKeys.clear();
+        updateHudKeys();
+      }
+    }
+
+    window.addEventListener("touchend", (e) => {
+      if (stickTouchId === null) return;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === stickTouchId) {
+          resetStick();
+          break;
+        }
+      }
+    });
+
+    window.addEventListener("touchcancel", (e) => {
+      if (stickTouchId === null) return;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === stickTouchId) {
+          resetStick();
+          break;
+        }
+      }
+    });
+
+    // ==================== Steam Deck Aiming Look Pad ====================
+    const steamLookPad = document.getElementById("steamLookPad");
+    let lookTouchId = null;
+    let lookLastX = 0;
+    let lookLastY = 0;
+    let lookHapticAccumulator = 0;
+
+    steamLookPad.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      if (lookTouchId !== null) return;
+
+      const t = e.changedTouches[0];
+      lookTouchId = t.identifier;
+      lookLastX = t.clientX;
+      lookLastY = t.clientY;
+      lookHapticAccumulator = 0;
+    }, { passive: false });
+
+    window.addEventListener("touchmove", (e) => {
+      if (lookTouchId === null) return;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (t.identifier === lookTouchId) {
+          e.preventDefault();
+          const dx = (t.clientX - lookLastX) * 1.8;
+          const dy = (t.clientY - lookLastY) * 1.8;
+          lookLastX = t.clientX;
+          lookLastY = t.clientY;
+
+          queuePointerMove(dx, dy);
+
+          // Physical trackball micro-haptic tick
+          lookHapticAccumulator += Math.hypot(dx, dy);
+          if (lookHapticAccumulator > 22) {
+            lookHapticAccumulator = 0;
+            triggerHaptic("gpCameraTick");
+          }
+          break;
+        }
+      }
+    }, { passive: false });
+
+    function resetLookPad() {
+      lookTouchId = null;
+      lookHapticAccumulator = 0;
+    }
+
+    window.addEventListener("touchend", (e) => {
+      if (lookTouchId === null) return;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === lookTouchId) {
+          resetLookPad();
+          break;
+        }
+      }
+    });
+
+    window.addEventListener("touchcancel", (e) => {
+      if (lookTouchId === null) return;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === lookTouchId) {
+          resetLookPad();
+          break;
+        }
+      }
     });
 
     // ==================== Keyboard Inputs ====================

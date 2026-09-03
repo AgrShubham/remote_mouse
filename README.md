@@ -53,6 +53,15 @@ No apps to install on your phone — simply connect to the same Wi-Fi network, n
 - Quick playback controls: `Play/Pause`, `Previous`, `Next`.
 - Volume toggles: `Volume Up`, `Volume Down`, and instant `Mute`.
 
+### 🎮 DualSense / Steam Deck-Style Remote Gamepad
+- **Zero-Driver Universal Compatibility**: Natively emulates PC inputs via `pynput`—works instantly with 100% of PC games without requiring kernel drivers or third-party emulators.
+- **360° Virtual Analog Thumbstick**: Smooth thumb-follow with inner spring return, deadzone filtering, and auto-sprint ring (push to edge for Shift/Sprint).
+- **Precision ABXY Diamond**: Tactile mechanical-switch depression with neon backlit accents and Force Touch haptics.
+- **Steam Deck Precision Aiming Trackpad**: Dedicated glass camera trackpad for 3D/FPS games with physical ball-bearing micro-haptics.
+- **Shoulder Controls**: Dedicated Left & Right Triggers (LT/RT) and Bumpers (LB/RB).
+- **Custom Gaming Presets**: One-tap HUD switching between **FPS / Action**, **Racing / Driving**, and **Platformer / Retro**.
+- **Immersive Fullscreen Mode**: Dedicated fullscreen toggle hides mobile browser bars for complete handheld console immersion.
+
 ### 🔒 100% Offline & Private
 - Self-hosted on your local LAN with zero telemetry.
 - Socket.IO client library is bundled locally inside the server — zero external CDN dependencies.
@@ -193,7 +202,7 @@ You will see output indicating your local IP:
 - [x] Multi-Waveform Haptic Engine
 - [x] Two-Finger Inertial Momentum Scrolling
 - [x] Virtual Keyboard & Media Controller
-- [ ] **Remote Gamepad Panel** (Analog Thumbsticks, ABXY Diamond, Shoulder Triggers, Steam Deck Aiming Trackpad)
+- [x] **Remote Gamepad Panel** (Analog Thumbstick, ABXY Diamond, Shoulder Triggers, Steam Deck Aiming Trackpad, Multi-Waveform Haptics)
 - [ ] Customizable Macro Buttons & App Shortcuts
 - [ ] QR Code Terminal Display for Instant Phone Pairing
 
