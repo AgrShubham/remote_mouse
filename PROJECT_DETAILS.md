@@ -298,7 +298,12 @@ Remote Mouse/
 │   └── index.html            # Complete single-page frontend (HTML5, CSS3, JavaScript engines)
 ├── assets/
 │   ├── banner.jpg            # High-resolution project banner for GitHub README
-│   └── mobile_preview.png    # Mobile interface mockup screenshot
+│   ├── Trackpad .png         # Standard trackpad interface preview
+│   ├── Trackpad fullscreen.png # Edge-to-edge fullscreen trackpad preview
+│   ├── Gamepad layout 1.png  # Asymmetric Xbox-style gamepad console preview
+│   ├── Gmepad layout 2.png   # Symmetric PlayStation-style gamepad console preview
+│   ├── Keyboard control.png  # 80% TKL physical mechanical keyboard preview
+│   └── media control.png     # Media & volume controls interface preview
 ├── PROJECT_DETAILS.md        # Comprehensive technical architecture & project documentation (this file)
 ├── README.md                 # User-facing repository overview, quickstart & feature summary
 └── walkthrough.md            # Verified execution logs, changelogs & verification evidence

@@ -43,6 +43,23 @@
 - **Double-Tap & Hold Drag Lock**: Double-tap and hold to drag windows without holding physical buttons.
 - **Dedicated Fullscreen Mode**: Top toolbar `[ ⛶ Fullscreen ]` button expands the glass trackpad edge-to-edge across `100vw` × `100dvh` with safe-area insets.
 
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="assets/Trackpad%20.png" width="280" alt="Trackpad Standard View" style="border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+        <b>Standard Trackpad View</b><br/>
+        <sub>Speed slider, status pill & integrated click zones</sub>
+      </td>
+      <td align="center" width="50%">
+        <img src="assets/Trackpad%20fullscreen.png" width="280" alt="Trackpad Fullscreen View" style="border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+        <b>Edge-to-Edge Fullscreen</b><br/>
+        <sub>Flush edge-to-edge glass touch surface</sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ---
 
 ### 🎮 2. Dual-Layout Pro Gamepad Console
@@ -75,6 +92,23 @@ A complete, driverless handheld controller designed for PC gaming with pixel-per
 - **Edge-to-Edge Fullscreen Fitting**:
   - Dynamically scales using responsive `vmin` units to fill 100% of any smartphone display (16:9, 19.5:9, 21:9) with zero letterboxing.
 
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="assets/Gamepad%20layout%201.png" width="460" alt="Gamepad Layout 1 (Asymmetric)" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+        <b>Layout 1: Asymmetric (Xbox Style)</b><br/>
+        <sub>Top D-Pad, lower Left Stick, upper Right Stick & ABXY diamond</sub>
+      </td>
+      <td align="center" width="50%">
+        <img src="assets/Gmepad%20layout%202.png" width="460" alt="Gamepad Layout 2 (Symmetric)" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+        <b>Layout 2: Symmetric (PlayStation Style)</b><br/>
+        <sub>Dual lower thumbsticks, top shoulder triggers & clover D-Pad</sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ---
 
 ### ⌨️ 3. Physical Mechanical Keyboard
@@ -101,19 +135,78 @@ A full reproduction of an authentic 80% / Tenkeyless (TKL) physical mechanical k
   - Tapping `Ctrl` or `Alt` latches the modifier in blue, enabling effortless mobile execution of combos like `Ctrl + C`, `Ctrl + V`, and `Alt + Tab`.
 - **Dedicated Fullscreen Mode**: Tap `[ ⛶ Fullscreen ]` for a full-width typing console.
 
+<div align="center">
+  <img src="assets/Keyboard%20control.png" width="880" alt="Mechanical Keyboard Console" style="border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-width: 100%;" /><br/>
+  <b>80% / TKL Mechanical Keyboard Console with Realistic Keycap Geometry & Cherry MX Acoustics</b>
+</div>
+
 ---
 
 ### 🎵 4. Media & System Controller
 - Instant playback controls: `⏮ Prev`, `⏯ Play/Pause`, `⏭ Next`.
 - Volume toggles: `🔉 Vol -`, `🔇 Mute`, `🔊 Vol +`.
 
+<div align="center">
+  <img src="assets/media%20control.png" width="300" alt="Media Controls Interface" style="border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+  <b>Dedicated Media & Master Volume Controls</b>
+</div>
+
 ---
 
-## 📱 App Preview
+## 📱 Live Mobile Previews
 
 <div align="center">
-  <img src="assets/mobile_preview.png" alt="Remote Trackpad Pro Interface" width="340" style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
-  <p><em>Sleek, dark-mode glass trackpad running in a mobile browser over local Wi-Fi.</em></p>
+
+### 🖱️ Touchpad & Media Controls (Portrait)
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="assets/Trackpad%20.png" width="260" alt="Trackpad Standard View" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+      <b>MacBook Glass Trackpad</b><br/>
+      <sub>Speed slider, status header & integrated click zones</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="assets/Trackpad%20fullscreen.png" width="260" alt="Trackpad Fullscreen View" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+      <b>Edge-to-Edge Fullscreen</b><br/>
+      <sub>Flush edge-to-edge touch surface</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="assets/media%20control.png" width="260" alt="Media Controls" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+      <b>Media & Volume Controls</b><br/>
+      <sub>Instant playback & master volume control</sub>
+    </td>
+  </tr>
+</table>
+
+<br/>
+
+### 🎮 Dual-Layout Pro Gamepad (Landscape)
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/Gamepad%20layout%201.png" width="460" alt="Gamepad Layout 1 (Asymmetric)" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+      <b>Layout 1: Asymmetric (Xbox Style)</b><br/>
+      <sub>Top D-Pad, lower Left Stick, upper Right Stick & ABXY diamond</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/Gmepad%20layout%202.png" width="460" alt="Gamepad Layout 2 (Symmetric)" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" /><br/><br/>
+      <b>Layout 2: Symmetric (PlayStation Style)</b><br/>
+      <sub>Dual lower thumbsticks, top shoulder triggers & clover D-Pad</sub>
+    </td>
+  </tr>
+</table>
+
+<br/>
+
+### ⌨️ Physical Mechanical Keyboard Console (Landscape)
+
+<p align="center">
+  <img src="assets/Keyboard%20control.png" width="880" alt="Mechanical Keyboard Console" style="border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-width: 100%;" /><br/>
+  <b>Authentic 80% / TKL Mechanical Deck with Cherry MX Switch Acoustics & Haptic Actuation</b>
+</p>
+
 </div>
 
 ---
