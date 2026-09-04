@@ -242,16 +242,83 @@
       color: #34d399;
     }
 
+    /* ==================== Fullscreen Trackpad Mode (Edge-to-Edge) ==================== */
     :fullscreen #view-touchpad,
-    :-webkit-full-screen #view-touchpad {
+    :-webkit-full-screen #view-touchpad,
+    #view-touchpad.is-fullscreen {
       position: fixed;
       inset: 0;
       z-index: 99999;
       width: 100vw;
+      height: 100vh;
       height: 100dvh;
       background: #0b0c10;
-      padding: calc(6px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) calc(10px + env(safe-area-inset-left, 0px));
+      padding: 0;
+      margin: 0;
+      gap: 0;
       box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    :fullscreen #view-touchpad .trackpad-toolbar,
+    :-webkit-full-screen #view-touchpad .trackpad-toolbar,
+    #view-touchpad.is-fullscreen .trackpad-toolbar {
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(14, 15, 21, 0.96);
+      padding: calc(4px + env(safe-area-inset-top, 0px)) calc(14px + env(safe-area-inset-right, 0px)) 4px calc(14px + env(safe-area-inset-left, 0px));
+      margin: 0;
+      width: 100%;
+      height: auto;
+      flex-shrink: 0;
+    }
+
+    :fullscreen #view-touchpad .mac-trackpad-frame,
+    :-webkit-full-screen #view-touchpad .mac-trackpad-frame,
+    #view-touchpad.is-fullscreen .mac-trackpad-frame {
+      border-radius: 0;
+      border: none;
+      margin: 0;
+      box-shadow: none;
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+    }
+
+    :fullscreen #view-touchpad .trackpad-motion-zone,
+    :-webkit-full-screen #view-touchpad .trackpad-motion-zone,
+    #view-touchpad.is-fullscreen .trackpad-motion-zone {
+      padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
+    }
+
+    :fullscreen #view-touchpad .trackpad-click-strip,
+    :-webkit-full-screen #view-touchpad .trackpad-click-strip,
+    #view-touchpad.is-fullscreen .trackpad-click-strip {
+      height: clamp(50px, 14vh, 64px);
+      min-height: 0;
+      padding: 0 calc(10px + env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) calc(10px + env(safe-area-inset-left, 0px));
+      background: linear-gradient(180deg, rgba(22, 24, 33, 0.98) 0%, rgba(10, 11, 16, 0.99) 100%);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 0;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+
+    :fullscreen #view-touchpad .click-zone,
+    :-webkit-full-screen #view-touchpad .click-zone,
+    #view-touchpad.is-fullscreen .click-zone {
+      height: clamp(38px, 11vh, 48px);
+      border-radius: 12px;
+      font-size: clamp(12.5px, 3vh, 14px);
+    }
+
+    :fullscreen #view-touchpad .trackpad-guide-bar,
+    :-webkit-full-screen #view-touchpad .trackpad-guide-bar,
+    #view-touchpad.is-fullscreen .trackpad-guide-bar {
+      display: none;
     }
 
     /* Monolithic Trackpad Glass Surface */
@@ -2107,6 +2174,10 @@
 
     function updateTrackpadFullscreenUI() {
       const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      const viewTouchpad = document.getElementById("view-touchpad");
+      if (viewTouchpad) {
+        viewTouchpad.classList.toggle("is-fullscreen", isFs);
+      }
       if (trackpadFullscreenBtn) {
         const enterIcon = trackpadFullscreenBtn.querySelector(".fs-icon-enter");
         const exitIcon = trackpadFullscreenBtn.querySelector(".fs-icon-exit");
